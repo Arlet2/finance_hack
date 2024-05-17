@@ -29,7 +29,11 @@ public class PaymentInfo {
     @ManyToOne
     private ItemCategory itemCategory;
 
-
     private PaymentType paymentType;
+
+    @ManyToOne
+    private User user;
+
+    private Boolean isTransfer;
 
 }
