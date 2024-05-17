@@ -34,8 +34,8 @@ public class AuthService {
         if (userRepo.existsByUsername(username)) {
             throw new UserAlreadyExistsException();
         } else {
-            User user = new User(username, hashPassword, birthday, email);
-            userRepo.save(user);
+            //User user = new User(username, hashPassword, birthday, email);
+            //userRepo.save(user);
             return generateJwtToken(username);
         }
     }

@@ -9,20 +9,29 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import su.arlet.finance_hack.core.Finance;
+import su.arlet.finance_hack.core.Goal;
 
 @RestController
-@RequestMapping("${api.path}/finances")
-@Tag(name = "Finance API")
-public class FinanceController {
+@RequestMapping("${api.path}/goals")
+@Tag(name = "Goal API")
+public class GoalController {
+
+    private class CreateGoalEntity {
+
+    }
+
+    private class UpdateGoalEntity {
+
+    }
+
     @ApiResponse(responseCode = "200", description = "OK",
             content = {
-            @Content(array = @ArraySchema(schema = @Schema(implementation = FinanceController.class)))
-    })
+                    @Content(array = @ArraySchema(schema = @Schema(implementation = Goal.class)))
+            })
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     @GetMapping("/")
-    @Operation(summary = "Get finances by filters")
-    public void getFinances(
+    @Operation(summary = "Get goals by filters")
+    public void getGoals(
             @RequestParam String queryObject1,
             @RequestParam String queryObject2
     ) {
@@ -30,57 +39,57 @@ public class FinanceController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get ad post by ID")
-    @ApiResponse(responseCode = "200", description = "Success - found ad post", content = {
-            @Content(schema = @Schema(implementation = Finance.class))
+    @Operation(summary = "Get goal by ID")
+    @ApiResponse(responseCode = "200", description = "Success - found goal", content = {
+            @Content(schema = @Schema(implementation = Goal.class))
     }
-            )
-    @ApiResponse(responseCode = "404", description = "Not found - ad post not found")
+    )
+    @ApiResponse(responseCode = "404", description = "Not found - goal not found")
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
-    public ResponseEntity<?> getFinanceByID(@PathVariable Long id) {
-        return new ResponseEntity<>(new Finance(), HttpStatus.OK);
+    public ResponseEntity<?> getGoalByID(@PathVariable Long id) {
+        return new ResponseEntity<>(new Goal(), HttpStatus.OK);
     }
 
     @PostMapping("/")
-    @Operation(summary = "Create a new ad post")
+    @Operation(summary = "Create a new goal")
     @ApiResponse(
-            responseCode = "201", description = "Created ad post id", content = {
+            responseCode = "201", description = "Created goal id", content = {
             @Content(schema = @Schema(implementation = Long.class))}
-            )
-    @ApiResponse(
-            responseCode = "400", description = "Bad body", content = {
-            @Content(schema = @Schema(implementation = String.class))
-}
-            )
-    @ApiResponse(responseCode = "404", description = "Not found - user not found")
-    @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
-    public ResponseEntity<?> createAdPost(@RequestBody Finance finance) {
-        return new ResponseEntity<>(0, HttpStatus.CREATED);
-    }
-
-    @PatchMapping("/{id}")
-    @Operation(summary = "Update ad post info")
-    @ApiResponse(responseCode = "200", description = "Success - updated ad post", content = {@Content()})
+    )
     @ApiResponse(
             responseCode = "400", description = "Bad body", content = {
             @Content(schema = @Schema(implementation = String.class))
     }
     )
-    @ApiResponse(responseCode = "404", description = "Not found - ad post not found", content = {@Content()})
+    @ApiResponse(responseCode = "404", description = "Not found - goal not found")
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
-    public ResponseEntity<?> updateAdPost(
+    public ResponseEntity<?> createGoal(@RequestBody Goal goal) {
+        return new ResponseEntity<>(0, HttpStatus.CREATED);
+    }
+
+    @PatchMapping("/{id}")
+    @Operation(summary = "Update goal")
+    @ApiResponse(responseCode = "200", description = "Success - updated goal", content = {@Content()})
+    @ApiResponse(
+            responseCode = "400", description = "Bad body", content = {
+            @Content(schema = @Schema(implementation = String.class))
+    }
+    )
+    @ApiResponse(responseCode = "404", description = "Not found - goal not found", content = {@Content()})
+    @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
+    public ResponseEntity<?> updateGoal(
             @PathVariable Long id,
-            @RequestBody Long updateAdPost
-            ) {
+            @RequestBody Goal goal
+    ) {
         return ResponseEntity.ok(null);
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete ad post")
-    @ApiResponse(responseCode = "200", description = "Success - deleted ad post", content = {@Content()})
+    @Operation(summary = "Delete goal")
+    @ApiResponse(responseCode = "200", description = "Success - deleted goal", content = {@Content()})
     @ApiResponse(responseCode = "204", description = "No content", content = {@Content()})
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
-    public ResponseEntity<?> deleteAdPost(@PathVariable Long id) {
+    public ResponseEntity<?> deleteGoal(@PathVariable Long id) {
         return ResponseEntity.ok(null);
     }
 }
