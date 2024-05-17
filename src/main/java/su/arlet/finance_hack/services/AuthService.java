@@ -25,16 +25,15 @@ public class AuthService {
     private final UserRepo userRepo;
     private final Algorithm algorithm = Algorithm.HMAC256("Shulga");
     private final JWTVerifier verifier = JWT.require(algorithm)
-            .withIssuer("serv")
+            .withIssuer("finance")
             .build();
 
-    public String registerUser(String username, String hashPassword, LocalDate birthday, String email) {
-        if (userRepo.existsByUsername(username)) {
+    public String registerUser(User user) {
+        if (userRepo.existsByUsername(user.getUsername())) {
             throw new UserAlreadyExistsException();
         } else {
-            //User user = new User(username, hashPassword, birthday, email);
-            //userRepo.save(user);
-            return generateJwtToken(username);
+            userRepo.save(user);
+            return generateJwtToken();
         }
     }
 
@@ -42,7 +41,7 @@ public class AuthService {
         if (userRepo.existsByUsername(username)) {
             User user = userRepo.getUserByUsername(username);
             if (user.getHashPassword().equals(hashPassword)) {
-                return generateJwtToken(username);
+                return generateJwtToken();
             } else {
                 throw new WrongPasswordException();
             }
@@ -51,7 +50,7 @@ public class AuthService {
         }
     }
 
-    public String generateJwtToken(String username) {
+    public String generateJwtToken() {
         String token = JWT.create()
                 .withIssuer("finance")
                 .withExpiresAt(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7)) // 1 week
@@ -65,5 +64,6 @@ public class AuthService {
         decodedJWT = verifier.verify(token);
         return decodedJWT.getSubject();
     }
+
 
 }

@@ -34,5 +34,6 @@ public class User {
     @ManyToOne
     private Report[] reports;
 
+    @Column(name = "user_limit", nullable = false)
     private long limit;
 }
