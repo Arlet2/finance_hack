@@ -6,37 +6,45 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import su.arlet.finance_hack.core.Goal;
+import su.arlet.finance_hack.services.GoalService;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("${api.path}/goals")
 @Tag(name = "Goal API")
 public class GoalController {
 
-    private class CreateGoalEntity {
+    private final GoalService goalService;
+
+    @Autowired
+    public GoalController(GoalService goalService) {
+        this.goalService = goalService;
+    }
+
+    public class CreateGoalEntity {
+
+        private long sum;
+        private LocalDate deadline;
+        private String name;
+        private String description;
 
     }
 
-    private class UpdateGoalEntity {
+    public class UpdateGoalEntity {
 
-    }
+        private long sum;
+        private LocalDate deadline;
+        private String name;
 
-    @ApiResponse(responseCode = "200", description = "OK",
-            content = {
-                    @Content(array = @ArraySchema(schema = @Schema(implementation = Goal.class)))
-            })
-    @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
-    @GetMapping("/")
-    @Operation(summary = "Get goals by filters")
-    public void getGoals(
-            @RequestParam String queryObject1,
-            @RequestParam String queryObject2
-    ) {
+        }
 
-    }
+
 
     @GetMapping("/{id}")
     @Operation(summary = "Get goal by ID")
@@ -46,8 +54,9 @@ public class GoalController {
     )
     @ApiResponse(responseCode = "404", description = "Not found - goal not found")
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
-    public ResponseEntity<?> getGoalByID(@PathVariable Long id) {
-        return new ResponseEntity<>(new Goal(), HttpStatus.OK);
+    public ResponseEntity<Goal> getGoalByID(@PathVariable Long id) {
+        Goal goal = goalService.getGoalById(id);
+        return new ResponseEntity<>(goal, HttpStatus.OK);
     }
 
     @PostMapping("/")
@@ -63,8 +72,11 @@ public class GoalController {
     )
     @ApiResponse(responseCode = "404", description = "Not found - goal not found")
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
-    public ResponseEntity<?> createGoal(@RequestBody Goal goal) {
-        return new ResponseEntity<>(0, HttpStatus.CREATED);
+    public ResponseEntity<Goal> createGoal(@RequestBody Goal goal) {
+
+
+        Goal createdGoal = goalService.createGoal(goal);
+        return new ResponseEntity<>(createdGoal, HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}")
@@ -88,6 +100,7 @@ public class GoalController {
     @Operation(summary = "Delete goal")
     @ApiResponse(responseCode = "200", description = "Success - deleted goal", content = {@Content()})
     @ApiResponse(responseCode = "204", description = "No content", content = {@Content()})
+    @ApiResponse(responseCode = "403", description = "Forbidden - user does not own the goal")
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     public ResponseEntity<?> deleteGoal(@PathVariable Long id) {
         return ResponseEntity.ok(null);
