@@ -20,12 +20,6 @@ import su.arlet.finance_hack.services.PaymentInfoService;
 @Tag(name = "WASTE API")
 public class WasteController {
 
-    private class PaymentInfoEntity {
-
-        private PaymentInfo info;
-        private
-
-    }
 
     private final PaymentInfoService paymentInfoService;
     private final AuthService authService;
