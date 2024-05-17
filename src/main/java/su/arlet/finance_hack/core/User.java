@@ -1,9 +1,6 @@
 package su.arlet.finance_hack.core;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,4 +27,12 @@ public class User {
 
     @Column(name = "email")
     private String email;
+
+    @ManyToOne
+    private Goal[] goals;
+
+    @ManyToOne
+    private Report[] reports;
+
+    private long limit;
 }
