@@ -64,7 +64,7 @@ public class GoalService {
     public List<Goal> getGoalsWithinPeriod(LocalDate startDate, LocalDate endDate) {
         return goalRepo.findByDeadlineBetween(startDate, endDate);
     }
-    public Goal updateGoalProgress(Long id, long contribution) {
+    public Goal AddContributionToGoal (Long id, long contribution) {
         Goal goal = goalRepo.findById(id).orElseThrow(ResourceNotFoundException::new);
         goal.setCurrentTotal(goal.getCurrentTotal() + contribution);
         return goalRepo.save(goal);
