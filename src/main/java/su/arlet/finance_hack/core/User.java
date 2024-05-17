@@ -6,6 +6,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 @Setter
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "users")
 public class User {
     @Id
@@ -23,9 +25,9 @@ public class User {
     @Column(name = "hashPassword", nullable = false)
     private String hashPassword;
 
-
     @Column(name = "birthday", nullable = false)
     private LocalDate birthday;
+
     @Column(name = "email")
     private String email;
 }

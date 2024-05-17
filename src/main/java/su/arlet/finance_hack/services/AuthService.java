@@ -2,8 +2,6 @@ package su.arlet.finance_hack.services;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTCreationException;
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import lombok.AllArgsConstructor;
@@ -39,8 +37,9 @@ public class AuthService {
             return generateJwtToken(username);
         }
     }
+
     public String loginUser(String username, String hashPassword) {
-        if(userRepo.existsByUsername(username)) {
+        if (userRepo.existsByUsername(username)) {
             User user = userRepo.getUserByUsername(username);
             if (user.getHashPassword().equals(hashPassword)) {
                 return generateJwtToken(username);
@@ -53,26 +52,18 @@ public class AuthService {
     }
 
     public String generateJwtToken(String username) {
-        try {
-            String token = JWT.create()
-                    .withIssuer("finance")
-                    .withExpiresAt(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7)) // 1 week
-                    .withClaim("username", username)
-                    .sign(algorithm);
-            return token;
-        } catch (JWTCreationException exception){
-            return null;
-        }
+        String token = JWT.create()
+                .withIssuer("finance")
+                .withExpiresAt(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7)) // 1 week
+                .withSubject("sub")
+                .sign(algorithm);
+        return token;
     }
 
     public String decodeJwtToken(String token) {
         DecodedJWT decodedJWT;
-        try {
-            decodedJWT = verifier.verify(token);
-            return decodedJWT.getClaim("username").asString();
-        } catch (JWTVerificationException exception){
-            return "";
-        }
+        decodedJWT = verifier.verify(token);
+        return decodedJWT.getSubject();
     }
 
 }
