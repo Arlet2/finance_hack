@@ -22,9 +22,9 @@ public class User {
     @Column(name = "hashPassword", nullable = false)
     private String hashPassword;
 
-
     @Column(name = "birthday", nullable = false)
     private LocalDate birthday;
+
     @Column(name = "email")
     private String email;
 
@@ -34,5 +34,6 @@ public class User {
     @ManyToOne
     private Report[] reports;
 
+    @Column(name = "user_limit", nullable = false)
     private long limit;
 }
