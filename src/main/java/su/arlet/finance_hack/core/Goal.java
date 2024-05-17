@@ -29,4 +29,8 @@ public class Goal {
     @ManyToOne
     private User user;
 
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> f0de473 (change 1)

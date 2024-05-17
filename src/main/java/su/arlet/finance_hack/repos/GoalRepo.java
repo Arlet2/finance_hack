@@ -12,5 +12,4 @@ public interface GoalRepo extends JpaRepository<Goal, Long> {
     List<Goal> findByDeadlineAfter(LocalDate deadline);
     List<Goal> findAllByOrderByDeadlineAsc();
     List<Goal> findByDeadlineBetween(LocalDate startDate, LocalDate endDate);
-
 }

@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,13 +33,11 @@ public class GoalController {
     private final GoalService goalService;
     private final AuthService authService;
 
-
     @Autowired
     public GoalController(GoalService goalService, AuthService authService) {
         this.goalService = goalService;
         this.authService = authService;
     }
-
 
 
     @GetMapping("/{id}")
@@ -50,10 +49,9 @@ public class GoalController {
     @ApiResponse(responseCode = "404", description = "Not found - goal not found")
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     public ResponseEntity<Goal> getGoalByID(@PathVariable Long id) {
-                Goal goal = goalService.getGoalById(id);
-                return ResponseEntity.ok(goal);
-        }
-
+        Goal goal = goalService.getGoalById(id);
+        return new ResponseEntity<>(goal, HttpStatus.OK);
+    }
 
     @PostMapping("/")
     @Operation(summary = "Create a new goal")
@@ -69,7 +67,7 @@ public class GoalController {
     @ApiResponse(responseCode = "404", description = "Not found - goal not found")
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     public ResponseEntity<?> createGoal(@RequestBody GoalService.CreateGoalEntity createGoalEntity, HttpServletRequest servletRequest) {
-        String username = authService.getUsernameByHttpRequest(servletRequest);
+        String username = authService.getUsernameFromHttpRequest(servletRequest);
         createGoalEntity.validate();
         User user = authService.getByUsername(username);
         if (user == null) {
@@ -98,7 +96,7 @@ public class GoalController {
             HttpServletRequest servletRequest
     ) {
         Goal goal = goalService.getGoalById(id);
-        String username = authService.getUsernameByHttpRequest(servletRequest);
+        String username = authService.getUsernameFromHttpRequest(servletRequest);
         if (!goal.getUser().getUsername().equals(username)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -120,7 +118,7 @@ public class GoalController {
     @ApiResponse(responseCode = "403", description = "Forbidden - user does not own the goal")
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     public ResponseEntity<?> deleteGoal(@PathVariable Long id, HttpServletRequest servletRequest) {
-        String username = authService.getUsernameByHttpRequest(servletRequest);
+        String username = authService.getUsernameFromHttpRequest(servletRequest);
         Goal goal = goalService.getGoalById(id);
         if (!goal.getUser().getUsername().equals(username)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
