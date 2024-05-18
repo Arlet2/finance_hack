@@ -19,6 +19,7 @@ import su.arlet.finance_hack.utils.SHA1Hasher;
 
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -64,7 +65,6 @@ public class AuthService {
         if (!userRepo.existsByUsername(username)) {
             throw new UserAlreadyExistsException();
         }
-
         userRepo.deleteUserByUsername(username);
 
     }
@@ -94,6 +94,10 @@ public class AuthService {
                 return decodeJwtToken(parsedHeader[1]);
         }
         throw new InvalidAuthorizationHeaderException();
+    }
+
+    public List<User> getAllUsers() {
+        return userRepo.findAll();
     }
 
     public User getByUsername(String userName) {
