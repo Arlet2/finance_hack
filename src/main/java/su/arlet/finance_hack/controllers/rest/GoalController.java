@@ -208,6 +208,7 @@ public class GoalController {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
             @RequestBody GoalService.CreateGoalEntity.UpdateGoalEntity updateGoalEntity,
             HttpServletRequest servletRequest
     ) {
@@ -233,8 +234,16 @@ public class GoalController {
 =======
             @RequestBody GoalService.CreateGoalEntity.UpdateGoalEntity updateGoalEntity
 >>>>>>> cdcd9a3 (goals controller done (honestly, no))
+=======
+            @RequestBody GoalService.CreateGoalEntity.UpdateGoalEntity updateGoalEntity,
+            HttpServletRequest servletRequest
+>>>>>>> e893839 (corrected updateGoal)
     ) {
         Goal goal = goalService.getGoalById(id);
+        String username = authService.getUsernameByHttpRequest(servletRequest);
+        if (!goal.getUser().getUsername().equals(username)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         updateGoalEntity.validate();
         if (updateGoalEntity.getSum() != null) {
             goal.setSum(updateGoalEntity.getSum());
