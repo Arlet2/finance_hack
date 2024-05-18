@@ -7,7 +7,6 @@ public enum Period {
     WEEKLY,
     MONTHLY,
     YEARLY;
-
     public String getPeriodMessage() {
         return switch (this) {
             case DAILY -> "0 0 00 * * *";
