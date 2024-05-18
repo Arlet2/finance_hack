@@ -1,7 +1,7 @@
 package su.arlet.finance_hack.services;
 
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.prometheus.client.Counter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import su.arlet.finance_hack.core.ItemCategory;
@@ -27,10 +27,10 @@ public class PaymentInfoService {
     private final Counter wasteCounter;
 
     @Autowired
-    public PaymentInfoService(PaymentInfoRepo paymentInfoRepo, ItemCategoryRepo itemCategoryRepo, MeterRegistry meterRegistry, UserRepo userRepo) {
+    public PaymentInfoService(PaymentInfoRepo paymentInfoRepo, ItemCategoryRepo itemCategoryRepo, MeterRegistry meterRegistry) {
         this.paymentInfoRepo = paymentInfoRepo;
         this.itemCategoryRepo = itemCategoryRepo;
-        wasteCounter = (Counter) meterRegistry.counter("waste_counter");
+        wasteCounter = meterRegistry.counter("waste_counter");
     }
 
     public Long addWaste(PaymentInfo info) {
@@ -45,7 +45,7 @@ public class PaymentInfoService {
             } else {
                 ItemCategory itemCategory = itemCategoryRepo.save(info.getItemCategory());
                 info.setItemCategory(itemCategory);
-                wasteCounter.inc();
+                wasteCounter.increment();
             }
         }
 
