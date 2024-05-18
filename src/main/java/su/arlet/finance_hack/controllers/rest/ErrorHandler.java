@@ -85,5 +85,11 @@ class ErrorHandler {
         return "repo has already been deleted";
     }
 
+    @ExceptionHandler(AuthFailedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String handleAuthFailedException(AuthFailedException e) {
+        return "Access denied / authorization error";
+    }
+
 
 }
