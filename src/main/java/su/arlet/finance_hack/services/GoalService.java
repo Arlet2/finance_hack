@@ -3,7 +3,7 @@ package su.arlet.finance_hack.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import su.arlet.finance_hack.core.Goal;
-import su.arlet.finance_hack.exceptions.ResourceNotFoundException;
+import su.arlet.finance_hack.exceptions.GoalNotFoundException;
 import su.arlet.finance_hack.repos.GoalRepo;
 
 import java.time.LocalDate;
@@ -11,7 +11,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 @Service
 public class GoalService {
@@ -25,7 +24,7 @@ public class GoalService {
     }
 
     public Goal getGoalById(Long id) {
-        return goalRepo.findById(id).orElseThrow(ResourceNotFoundException::new);
+        return goalRepo.findById(id).orElseThrow(GoalNotFoundException::new);
     }
 
     public Goal createGoal(Goal goal) {
@@ -56,24 +55,33 @@ public class GoalService {
         return goalRepo.findByDeadlineBetween(startDate, endDate);
     }
     public Goal AddContributionToGoal (Long id, long contribution) {
-        Goal goal = goalRepo.findById(id).orElseThrow(ResourceNotFoundException::new);
+        Goal goal = goalRepo.findById(id).orElseThrow(GoalNotFoundException::new);
         goal.setCurrentTotal(goal.getCurrentTotal() + contribution);
         return goalRepo.save(goal);
     }
-    public Goal updateGoal(Goal goalDetails) {
-        Goal goal = goalRepo.findById(goalDetails.getId()).orElseThrow(ResourceNotFoundException::new);
+    public Goal updateGoal(Long id, Map<String, Object> updates) {
+        Goal goal = goalRepo.findById(id).orElseThrow(GoalNotFoundException::new);
+
+        if (updates.containsKey("sum")) {
+            goal.setSum(((Number) updates.get("sum")).longValue());
+        }
+        if (updates.containsKey("deadline")) {
+            goal.setDeadline(LocalDate.parse((String) updates.get("deadline")));
+        }
+
         return goalRepo.save(goal);
     }
+
     public double calculateMonthlyContribution(long goalId) {
-        Goal goal = goalRepo.findById(goalId).orElseThrow(ResourceNotFoundException::new);
+        Goal goal = goalRepo.findById(goalId).orElseThrow(GoalNotFoundException::new);
         long remainingSum = goal.getSum() - goal.getCurrentTotal();
         long monthsRemaining = ChronoUnit.MONTHS.between(LocalDate.now(), goal.getDeadline());
         return (double) remainingSum / monthsRemaining;
     }
     public Map<String, Long> getGoalAchievementStats() {
         long totalGoals = goalRepo.count();
-        long completedGoals = goalRepo.countByIsDone(true);
-        long uncompletedGoals = totalGoals - completedGoals;
+        //long completedGoals = goalRepo.countByIsDone(true);
+        //long uncompletedGoals = totalGoals - completedGoals;
 
         Map<String, Long> stats = new HashMap<>();
         stats.put("totalGoals", totalGoals);
@@ -82,5 +90,4 @@ public class GoalService {
 
         return stats;
     }
-
 }
