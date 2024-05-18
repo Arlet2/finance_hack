@@ -10,15 +10,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import su.arlet.finance_hack.core.Finance;
 import su.arlet.finance_hack.core.Report;
 import su.arlet.finance_hack.core.ReportComparison;
-import su.arlet.finance_hack.core.enums.Period;
 import su.arlet.finance_hack.exceptions.UserNotFoundException;
-import su.arlet.finance_hack.repos.UserRepo;
 import su.arlet.finance_hack.services.ReportService;
 
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 

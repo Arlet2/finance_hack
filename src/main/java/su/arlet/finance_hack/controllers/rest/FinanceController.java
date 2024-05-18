@@ -17,8 +17,8 @@ import su.arlet.finance_hack.core.Finance;
 public class FinanceController {
     @ApiResponse(responseCode = "200", description = "OK",
             content = {
-            @Content(array = @ArraySchema(schema = @Schema(implementation = FinanceController.class)))
-    })
+                    @Content(array = @ArraySchema(schema = @Schema(implementation = FinanceController.class)))
+            })
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     @GetMapping("/")
     @Operation(summary = "Get finances by filters")
@@ -34,7 +34,7 @@ public class FinanceController {
     @ApiResponse(responseCode = "200", description = "Success - found ad post", content = {
             @Content(schema = @Schema(implementation = Finance.class))
     }
-            )
+    )
     @ApiResponse(responseCode = "404", description = "Not found - ad post not found")
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     public ResponseEntity<?> getFinanceByID(@PathVariable Long id) {
@@ -46,12 +46,12 @@ public class FinanceController {
     @ApiResponse(
             responseCode = "201", description = "Created ad post id", content = {
             @Content(schema = @Schema(implementation = Long.class))}
-            )
+    )
     @ApiResponse(
             responseCode = "400", description = "Bad body", content = {
             @Content(schema = @Schema(implementation = String.class))
-}
-            )
+    }
+    )
     @ApiResponse(responseCode = "404", description = "Not found - user not found")
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     public ResponseEntity<?> createAdPost(@RequestBody Finance finance) {
@@ -71,7 +71,7 @@ public class FinanceController {
     public ResponseEntity<?> updateAdPost(
             @PathVariable Long id,
             @RequestBody Long updateAdPost
-            ) {
+    ) {
         return ResponseEntity.ok(null);
     }
 

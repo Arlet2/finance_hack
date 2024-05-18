@@ -7,23 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import su.arlet.finance_hack.controllers.rest.ValidationException;
 import su.arlet.finance_hack.core.Goal;
-import su.arlet.finance_hack.exceptions.EntityWasAlreadyRemovedException;
 import su.arlet.finance_hack.exceptions.EntityNotFoundException;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import su.arlet.finance_hack.controllers.rest.ValidationException;
-import su.arlet.finance_hack.core.Goal;
 import su.arlet.finance_hack.exceptions.EntityWasAlreadyRemovedException;
-import su.arlet.finance_hack.exceptions.EntityNotFoundException;
 import su.arlet.finance_hack.repos.GoalRepo;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class GoalService {

@@ -8,9 +8,13 @@ import java.util.List;
 
 public interface GoalRepo extends JpaRepository<Goal, Long> {
     List<Goal> findByIsDone(boolean isDone);
+
     List<Goal> findByDeadlineBefore(LocalDate deadline);
+
     List<Goal> findByDeadlineAfter(LocalDate deadline);
+
     List<Goal> findAllByOrderByDeadlineAsc();
+
     List<Goal> findByDeadlineBetween(LocalDate startDate, LocalDate endDate);
 
 }

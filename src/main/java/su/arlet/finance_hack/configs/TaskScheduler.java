@@ -7,7 +7,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 @Configuration
 public class TaskScheduler {
     @Bean
-    public org.springframework.scheduling.TaskScheduler threadPoolTaskScheduler(){
+    public org.springframework.scheduling.TaskScheduler threadPoolTaskScheduler() {
         ThreadPoolTaskScheduler threadPoolTaskScheduler
                 = new ThreadPoolTaskScheduler();
         threadPoolTaskScheduler.setPoolSize(5);

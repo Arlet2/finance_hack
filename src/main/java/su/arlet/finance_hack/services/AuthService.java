@@ -23,7 +23,6 @@ import su.arlet.finance_hack.utils.SHA1Hasher;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @AllArgsConstructor
@@ -120,6 +119,7 @@ public class AuthService {
 
         return userByUsername;
     }
+
     public void updateUserByUsername(UpdateUserEntity updateUserEntity, String username) {
         if (!userRepo.existsByUsername(username)) {
             throw new UserAlreadyExistsException();
@@ -226,6 +226,7 @@ public class AuthService {
 
         }
     }
+
     @Getter
     @Setter
     @AllArgsConstructor

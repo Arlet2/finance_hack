@@ -1,6 +1,9 @@
 package su.arlet.finance_hack.core;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,7 +12,6 @@ import su.arlet.finance_hack.controllers.rest.ValidationException;
 import su.arlet.finance_hack.core.enums.PaymentType;
 
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
