@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@Table
 @Setter
 @Getter
 @AllArgsConstructor
@@ -26,5 +27,6 @@ public class Report {
     @ElementCollection
     @CollectionTable
     private Set<ReportCategory> reportCategories = new HashSet<>();
-
+    @ManyToOne
+    private User user;
 }
