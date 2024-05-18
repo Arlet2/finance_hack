@@ -7,12 +7,15 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import su.arlet.finance_hack.core.Report;
 import su.arlet.finance_hack.core.ReportComparison;
 import su.arlet.finance_hack.exceptions.UserNotFoundException;
+import su.arlet.finance_hack.services.AuthService;
 import su.arlet.finance_hack.services.ReportService;
 
 import java.util.List;
@@ -23,12 +26,14 @@ import java.util.Optional;
 @Tag(name = "Report API")
 public class ReportController {
     private final ReportService reportService;
+    private final AuthService authService;
 
     private final Counter reportsCounter;
 
     @Autowired
-    public ReportController(ReportService reportService, MeterRegistry meterRegistry) {
+    public ReportController(AuthService authService, ReportService reportService, MeterRegistry meterRegistry) {
         this.reportService = reportService;
+        this.authService = authService;
         reportsCounter = meterRegistry.counter("report_counter");
     }
 
@@ -36,24 +41,11 @@ public class ReportController {
     @Operation(summary = "get reports by filters")
     @ApiResponse(responseCode = "200", description = "Success - report deleted", content = {
             @Content(schema = @Schema(implementation = Report.class))})
-    public ResponseEntity<List<Report>> getReports(@RequestParam String periodType) {
+    public ResponseEntity<List<Report>> getReports(@RequestParam(required = false) String periodType) {
         List<Report> reports = reportService.getReports(periodType);
         reportsCounter.increment();
         return ResponseEntity.ok(reports);
     }
-//    @GetMapping("/date")
-//    @Operation(summary = "Get report by date")
-//    public ResponseEntity<List<Report>> getReportByDate(@RequestParam Timestamp date) {
-//        List<Report> reports = reportService.getByDate(date);
-//        return ResponseEntity.ok(reports);
-//    }
-//
-//    @GetMapping("/period")
-//    @Operation(summary = "Get reports by period")
-//    public ResponseEntity<List<Report>> getReportsByPeriod(@RequestParam String periodType) {
-//        List<Report> reports = reportService.getReportsByPeriod(periodType);
-//        return ResponseEntity.ok(reports);
-//    }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete report by ID")
@@ -62,7 +54,8 @@ public class ReportController {
     @ApiResponse(responseCode = "204", description = "No content")
     @ApiResponse(responseCode = "403", description = "Forbidden - access denied")
     @ApiResponse(responseCode = "404", description = "Report not found")
-    public ResponseEntity<?> deleteReport(@RequestParam Long id, @PathVariable String username) {
+    public ResponseEntity<?> deleteReport(@PathVariable Long id, HttpServletRequest servletRequest) {
+        String username = authService.getUsernameFromHttpRequest(servletRequest);
         Report report = reportService.getByIdBeforeDeleting(id);
         if (!report.getUser().getUsername().equals(username)) {
             throw new UserNotFoundException();
