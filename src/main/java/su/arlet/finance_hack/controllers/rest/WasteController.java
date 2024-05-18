@@ -1,7 +1,6 @@
 package su.arlet.finance_hack.controllers.rest;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import io.prometheus.client.Counter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -16,6 +15,7 @@ import su.arlet.finance_hack.core.User;
 import su.arlet.finance_hack.exceptions.UserNotFoundException;
 import su.arlet.finance_hack.services.AuthService;
 import su.arlet.finance_hack.services.PaymentInfoService;
+import su.arlet.finance_hack.services.UserService;
 
 
 // TODO : использовать общие exceptions
@@ -26,14 +26,16 @@ public class WasteController {
 
     private final PaymentInfoService paymentInfoService;
     private final AuthService authService;
+    private final UserService userService;
 
-    //private final Counter bankFaultCounter;
+//    private final Counter bankFaultCounter;
 
     @Autowired
-    public WasteController(PaymentInfoService paymentInfoService, AuthService authService, MeterRegistry meterRegistry) {
+    public WasteController(PaymentInfoService paymentInfoService, AuthService authService, MeterRegistry meterRegistry, UserService userService) {
         this.paymentInfoService = paymentInfoService;
         this.authService = authService;
-        //bankFaultCounter = (Counter) meterRegistry.counter("bank_fault_counter");
+        this.userService = userService;
+        //bankFaultCounter = meterRegistry.counter("finance_bank_fault_counter");
     }
 
     @PostMapping("/{username}")
@@ -47,7 +49,7 @@ public class WasteController {
     @ApiResponse(responseCode = "500", description = "Server error")
     public ResponseEntity<?> createWaste(@RequestBody PaymentInfo info, @PathVariable String username) {
 
-        User user = authService.getByUsername(username);
+        User user = userService.getByUsername(username);
 
         if (info == null) {
             //bankFaultCounter.inc();

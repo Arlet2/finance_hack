@@ -14,7 +14,6 @@ import lombok.Setter;
 @Setter
 public class ReportCategory {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String category; // todo: change to Category
     private long sum;
 }

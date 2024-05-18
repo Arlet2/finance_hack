@@ -17,6 +17,7 @@ import su.arlet.finance_hack.core.User;
 import su.arlet.finance_hack.core.enums.PaymentType;
 import su.arlet.finance_hack.services.AuthService;
 import su.arlet.finance_hack.services.PaymentInfoService;
+import su.arlet.finance_hack.services.UserService;
 
 import java.util.List;
 
@@ -27,11 +28,13 @@ public class InternalWastingController {
 
     private final PaymentInfoService paymentInfoService;
     private final AuthService authService;
+    private final UserService userService;
 
     @Autowired
-    public InternalWastingController(PaymentInfoService paymentInfoService, AuthService authService) {
+    public InternalWastingController(PaymentInfoService paymentInfoService, AuthService authService, UserService userService) {
         this.paymentInfoService = paymentInfoService;
         this.authService = authService;
+        this.userService = userService;
     }
 
     @GetMapping("/get_by_filter")
@@ -47,7 +50,7 @@ public class InternalWastingController {
     public ResponseEntity<?> getByFilter(@RequestBody PaymentInfoFilter filter, HttpServletRequest servletRequest) {
 
         String username = authService.getUsernameFromHttpRequest(servletRequest);
-        User user = authService.getByUsername(username);
+        User user = userService.getByUsername(username);
 
         return new ResponseEntity<>(paymentInfoService.getByFilter(filter, user), HttpStatus.OK);
     }
@@ -65,7 +68,7 @@ public class InternalWastingController {
     public ResponseEntity<?> updateWastes(@RequestBody List<PaymentInfo> paymentInfoList, HttpServletRequest servletRequest) {
         String username = authService.getUsernameFromHttpRequest(servletRequest);
 
-        User user = authService.getByUsername(username);
+        User user = userService.getByUsername(username);
 
         if (paymentInfoList == null || paymentInfoList.isEmpty())
             throw new ValidationException("paymentInfos on accept undefined");
