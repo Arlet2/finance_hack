@@ -1,7 +1,7 @@
 package su.arlet.finance_hack.services;
 
 import org.springframework.stereotype.Component;
-import su.arlet.finance_hack.core.Notifitacion;
+import su.arlet.finance_hack.core.Notification;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -12,13 +12,13 @@ public class NotificationSender {
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-    public Future<?> sendNotification(Notifitacion notifitacion) {
+    public Future<?> sendNotification(Notification notification) {
         return executorService.submit(() ->
-                send(notifitacion)
+                send(notification)
         );
     }
 
-    private void send(Notifitacion notifitacion) {
+    private void send(Notification notification) {
         // do something...
     }
 
