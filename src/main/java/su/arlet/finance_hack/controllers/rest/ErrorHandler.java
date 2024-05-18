@@ -5,6 +5,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import su.arlet.finance_hack.exceptions.IncorrectUsernameException;
+import su.arlet.finance_hack.exceptions.UserNotFoundException;
+import su.arlet.finance_hack.exceptions.WasteAlreadyDeletedException;
 
 @RestControllerAdvice
 class ErrorHandler {
@@ -61,4 +64,18 @@ class ErrorHandler {
 //    fun handleAccessDeniedException(e: PermissionDeniedException): String {
 //        return "you don't have access to this ${e.message}"
 //    }
+    @ExceptionHandler(UserNotFoundException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public String handleUserNotFoundException(UserNotFoundException e) {
+        return "login is incorrectly set / not set at all";
+    }
+
+    @ExceptionHandler(WasteAlreadyDeletedException.class)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public String handleWasteAlreadyDeletedException(WasteAlreadyDeletedException e) {
+        return "object has already been deleted";
+    }
+
+
+
 }
