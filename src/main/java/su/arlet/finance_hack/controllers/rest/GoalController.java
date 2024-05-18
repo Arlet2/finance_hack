@@ -47,6 +47,7 @@ import java.time.LocalDate;
 <<<<<<< HEAD
 import java.util.List;
 import java.util.stream.Collectors;
+<<<<<<< HEAD
 =======
 import java.util.Map;
 >>>>>>> 411a6c8 (check controller)
@@ -55,6 +56,8 @@ import java.util.Map;
 =======
 import java.util.List;
 >>>>>>> cdcd9a3 (goals controller done (honestly, no))
+=======
+>>>>>>> 9fc9360 (corrected getAllGoals)
 
 @RestController
 @RequestMapping("${api.path}/goals")
@@ -305,6 +308,7 @@ public class GoalController {
             @RequestParam(required = false) LocalDate endDate
     ) {
 <<<<<<< HEAD
+<<<<<<< HEAD
         List<Goal> goals = goalService.getAllGoals();
 
         List<Goal> filteredGoals = goals.stream()
@@ -332,4 +336,18 @@ public class GoalController {
     }
 
 >>>>>>> cdcd9a3 (goals controller done (honestly, no))
+=======
+        List<Goal> goals = goalService.getAllGoals();
+
+        List<Goal> filteredGoals = goals.stream()
+                .filter(goal -> isDone == null || goal.isDone() == isDone)
+                .filter(goal -> deadlineBefore == null || goal.getDeadline().isBefore(deadlineBefore))
+                .filter(goal -> (startDate == null || endDate == null) ||
+                        (goal.getDeadline().isAfter(startDate.minusDays(1)) &&
+                                goal.getDeadline().isBefore(endDate.plusDays(1))))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(filteredGoals);
+    }
+>>>>>>> 9fc9360 (corrected getAllGoals)
 }
