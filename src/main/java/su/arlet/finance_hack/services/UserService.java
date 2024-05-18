@@ -131,16 +131,16 @@ public class UserService {
 
         public void validate() {
             if (this.username == null || this.username.isEmpty()) {
-                throw new ValidationException("username");
+                throw new ValidationException("username is empty");
             }
             if (this.password == null || this.password.isEmpty()) {
-                throw new ValidationException("password");
+                throw new ValidationException("password is empty");
             }
             if (this.birthday == null) {
-                throw new ValidationException("birthday");
+                throw new ValidationException("birthday is null");
             }
             if (this.email == null || this.email.isEmpty()) {
-                throw new ValidationException("email");
+                throw new ValidationException("email is empty");
             }
 
         }
@@ -168,15 +168,14 @@ public class UserService {
 
         public void validate() {
             if (this.email != null && this.email.isEmpty()) {
-                throw new ValidationException("email");
+                throw new ValidationException("email is empty");
             }
             if (this.currentWastings != null && this.currentWastings < 0) {
-                throw new ValidationException("wastings");
+                throw new ValidationException("wastings mustn't be negative");
             }
             if (this.limit != null && this.limit < 0) {
-                throw new ValidationException("limit");
+                throw new ValidationException("limit mustn't be negative");
             }
-
         }
     }
 }
