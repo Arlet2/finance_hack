@@ -44,7 +44,7 @@ public class GoalService {
 
     public void deleteGoal(Long id, User user) {
         Goal goal = goalRepo.findById(id).orElseThrow(EntityWasAlreadyRemovedException::new);
-        if (goal.getUser().getUsername().equals(user.getUsername())) {
+        if (!goal.getUser().getUsername().equals(user.getUsername())) {
             throw new AuthFailedException();
         }
         goalRepo.deleteById(id);
@@ -90,7 +90,7 @@ public class GoalService {
 
     @Getter
     @Setter
-    public class CreateGoalEntity {
+    public static class CreateGoalEntity {
 
         private Long sum;
         private LocalDate deadline;
