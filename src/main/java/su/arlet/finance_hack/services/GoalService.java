@@ -102,13 +102,13 @@ public class GoalService {
         private String description;
 
         public void validate() {
-            if (!(this.sum != null && this.sum > 0)) {
+            if (this.sum == null || this.sum < 0) {
                 throw new ValidationException("sum undefined");
             }
             if (this.deadline == null) {
                 throw new ValidationException("deadline undefined");
             }
-            if (!(this.name != null && !this.name.isEmpty())) {
+            if (this.name == null || this.name.isEmpty()) {
                 throw new ValidationException("name undefined");
             }
 
@@ -125,18 +125,12 @@ public class GoalService {
             private String description;
 
             public void validate() {
-                if (this.deadline == null
+                if (this.deadline != null
                         || this.deadline.compareTo(LocalDate.now()) < 0) {
                     throw new ValidationException("deadline undefined");
                 }
-                if (!(this.sum != null && this.sum > 0)) {
+                if (this.sum != null && this.sum < 0) {
                     throw new ValidationException("sum undefined");
-                }
-                if (!(this.name != null && !this.name.isEmpty())) {
-                    throw new ValidationException("name undefined");
-                }
-                if (!(this.description != null && !this.description.isEmpty())) {
-                    throw new ValidationException("description undefined");
                 }
             }
         }
