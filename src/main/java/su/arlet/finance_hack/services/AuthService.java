@@ -77,4 +77,13 @@ public class AuthService {
         }
         throw new InvalidAuthorizationHeaderException();
     }
+
+    public User getByUsername(String userName) {
+        User userByUsername = userRepo.getUserByUsername(userName);
+        if (userByUsername == null)
+            throw new UserNotFoundException();
+
+        return userByUsername;
+    }
+
 }

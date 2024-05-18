@@ -56,4 +56,8 @@ public class PaymentInfoService {
         paymentInfoRepo.deleteById(paymentId);
     }
 
+    public PaymentInfo getByIdBeforeDeleting(Long id) {
+        return paymentInfoRepo.findById(id).orElseThrow(WasteAlreadyDeletedException::new);
+    }
+
 }
