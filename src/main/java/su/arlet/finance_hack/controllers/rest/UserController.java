@@ -84,13 +84,12 @@ public class UserController {
     }
     @GetMapping("/")
     @Operation(summary = "Get all Users")
-    @ApiResponse(responseCode = "200", description = "Success - found User", content = {
+    @ApiResponse(responseCode = "200", description = "Success - found Users", content = {
             @Content(schema = @Schema(implementation = User.class))
     }
     )
-    @ApiResponse(responseCode = "404", description = "Not found - User not found")
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
-    public ResponseEntity<?> getUserByUsername() {
+    public ResponseEntity<?> getUsers() {
         return new ResponseEntity<>(authService.getAllUsers(), HttpStatus.OK);
     }
 
