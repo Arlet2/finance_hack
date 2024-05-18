@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import su.arlet.finance_hack.core.ItemCategory;
 import su.arlet.finance_hack.core.PaymentInfo;
 import su.arlet.finance_hack.core.PaymentInfoFilter;
 import su.arlet.finance_hack.core.User;
@@ -47,8 +46,7 @@ public class InternalWastingController {
     @ApiResponse(responseCode = "500", description = "Server error")
     public ResponseEntity<?> getByFilter(@RequestBody PaymentInfoFilter filter, HttpServletRequest servletRequest) {
 
-        String username = authService.getUsernameByHttpRequest(servletRequest);
-
+        String username = authService.getUsernameFromHttpRequest(servletRequest);
         User user = authService.getByUsername(username);
 
         return new ResponseEntity<>(paymentInfoService.getByFilter(filter, user), HttpStatus.OK);
@@ -58,7 +56,7 @@ public class InternalWastingController {
 
     @PatchMapping("/")
     @Operation(summary = "change values in PaymentInfo")
-    @ApiResponse(responseCode = "200", description = "values successfully updated", content = {
+    @ApiResponse(responseCode = "200", description = "successfully updated values", content = {
             @Content(schema = @Schema(implementation = Long.class))
     }
     )
@@ -67,7 +65,7 @@ public class InternalWastingController {
     @ApiResponse(responseCode = "500", description = "Server error")
     public ResponseEntity<?> updateWastes(@RequestBody List<PaymentInfo> paymentInfoList, HttpServletRequest servletRequest) {
 
-        String username = authService.getUsernameByHttpRequest(servletRequest);
+        String username = authService.getUsernameFromHttpRequest(servletRequest);
         User user = authService.getByUsername(username);
 
         if (paymentInfoList == null || paymentInfoList.isEmpty())
@@ -84,7 +82,7 @@ public class InternalWastingController {
                 throw new ValidationException("item has undefined state");
             }
         }
-        return new ResponseEntity<>(paymentInfoService.updateWastes(paymentInfoList), HttpStatus.OK);
+        return new ResponseEntity<>(paymentInfoService.updateWastes(paymentInfoList).size(), HttpStatus.OK);
     }
 
 
