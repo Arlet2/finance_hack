@@ -22,6 +22,7 @@ public class ReportService {
     private final ReportRepo reportRepo;
     private final PaymentInfoRepo paymentInfoRepo;
     private final AuthService authService;
+    private final UserService userService;
 
     public List<Report> getReports(String periodType) {
         if (periodType == null) {
@@ -62,7 +63,7 @@ public class ReportService {
 
     public void createNewReport(Period period) {
 
-        List<User> users = authService.getAllUsers();
+        List<User> users = userService.getAllUsers();
         for (User user : users) {
             List<PaymentInfo> payments = paymentInfoRepo.findByUser(user);
 

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import su.arlet.finance_hack.controllers.rest.ValidationException;
 import su.arlet.finance_hack.core.Goal;
 import su.arlet.finance_hack.core.User;
+import su.arlet.finance_hack.exceptions.AuthFailedException;
 import su.arlet.finance_hack.exceptions.EntityNotFoundException;
 import su.arlet.finance_hack.exceptions.EntityWasAlreadyRemovedException;
 import su.arlet.finance_hack.repos.GoalRepo;
@@ -41,10 +42,12 @@ public class GoalService {
         return goalRepo.findAll();
     }
 
-    public void deleteGoal(Long id) {
-        goalRepo.findById(id).orElseThrow(EntityWasAlreadyRemovedException::new);
+    public void deleteGoal(Long id, User user) {
+        Goal goal = goalRepo.findById(id).orElseThrow(EntityWasAlreadyRemovedException::new);
+        if (goal.getUser().getUsername().equals(user.getUsername())) {
+            throw new AuthFailedException();
+        }
         goalRepo.deleteById(id);
-
     }
 
     public List<Goal> getGoalsByIsDone(boolean isDone) {

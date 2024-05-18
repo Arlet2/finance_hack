@@ -8,10 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import su.arlet.finance_hack.exceptions.EntityNotFoundException;
-import su.arlet.finance_hack.exceptions.UserAlreadyExistsException;
-import su.arlet.finance_hack.exceptions.UserNotFoundException;
-import su.arlet.finance_hack.exceptions.WasteAlreadyDeletedException;
+import su.arlet.finance_hack.exceptions.*;
 
 @RestControllerAdvice
 class ErrorHandler {
@@ -21,15 +18,18 @@ class ErrorHandler {
     private final Counter conflictErrorCounter;
     private final Counter unauthorizedErrorCounter;
     private final Counter contentErrorCounter;
+    private final Counter wrondPasswordCounter;
+    private final Counter repoAlreadyDeletedCounter;
 
     @Autowired
     public ErrorHandler(MeterRegistry meterRegistry) {
-        serverErrorCounter = meterRegistry.counter("server_error_counter");
-        badRequestErrorCounter = meterRegistry.counter("bad_request_error_counter");
-        conflictErrorCounter = meterRegistry.counter("conflict_error_counter");
-        unauthorizedErrorCounter = meterRegistry.counter("unauthorized_error_counter");
-        contentErrorCounter = meterRegistry.counter("content_error_counter");
-
+        serverErrorCounter = meterRegistry.counter("finance_server_error_counter");
+        badRequestErrorCounter = meterRegistry.counter("finance_bad_request_error_counter");
+        conflictErrorCounter = meterRegistry.counter("finance_conflict_error_counter");
+        unauthorizedErrorCounter = meterRegistry.counter("finance_unauthorized_error_counter");
+        contentErrorCounter = meterRegistry.counter("finance_content_error_counter");
+        wrondPasswordCounter = meterRegistry.counter("finance_wrong_password_counter");
+        repoAlreadyDeletedCounter = meterRegistry.counter("finance_repo_already_delete_counter");
     }
 
     @ExceptionHandler(Exception.class)
@@ -59,7 +59,7 @@ class ErrorHandler {
     }
 
     @ExceptionHandler(UserNotFoundException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public String handleUserNotFoundException(UserNotFoundException e) {
         unauthorizedErrorCounter.increment();
         return "login is incorrectly set / not set at all";
@@ -70,6 +70,25 @@ class ErrorHandler {
     public String handleWasteAlreadyDeletedException(WasteAlreadyDeletedException e) {
         contentErrorCounter.increment();
         return "object has already been deleted";
+    }
+    @ExceptionHandler(WrongPasswordException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String handleWrongPasswordException(WrongPasswordException e) {
+        wrondPasswordCounter.increment();
+        return "wrong password";
+    }
+
+    @ExceptionHandler(RepoAlreadyDeleteException.class)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public String handleRepoAlreadyDeleteException(RepoAlreadyDeleteException e) {
+        repoAlreadyDeletedCounter.increment();
+        return "repo has already been deleted";
+    }
+
+    @ExceptionHandler(AuthFailedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String handleAuthFailedException(AuthFailedException e) {
+        return "Access denied / authorization error";
     }
 
 

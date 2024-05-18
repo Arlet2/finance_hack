@@ -15,6 +15,7 @@ import su.arlet.finance_hack.core.Goal;
 import su.arlet.finance_hack.core.User;
 import su.arlet.finance_hack.services.AuthService;
 import su.arlet.finance_hack.services.GoalService;
+import su.arlet.finance_hack.services.UserService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -28,11 +29,13 @@ public class GoalController {
 
     private final GoalService goalService;
     private final AuthService authService;
+    private final UserService userService;
 
     @Autowired
-    public GoalController(GoalService goalService, AuthService authService) {
+    public GoalController(GoalService goalService, AuthService authService, UserService userService) {
         this.goalService = goalService;
         this.authService = authService;
+        this.userService = userService;
     }
 
 
@@ -66,7 +69,7 @@ public class GoalController {
     public ResponseEntity<?> createGoal(@RequestBody GoalService.CreateGoalEntity createGoalEntity, HttpServletRequest servletRequest) {
         String username = authService.getUsernameFromHttpRequest(servletRequest);
         createGoalEntity.validate();
-        User user = authService.getByUsername(username);
+        User user = userService.getByUsername(username);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
@@ -120,11 +123,8 @@ public class GoalController {
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     public ResponseEntity<?> deleteGoal(@PathVariable Long id, HttpServletRequest servletRequest) {
         String username = authService.getUsernameFromHttpRequest(servletRequest);
-        Goal goal = goalService.getGoalById(id);
-        if (!goal.getUser().getUsername().equals(username)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-        goalService.deleteGoal(id);
+        User user = authService.getByUsername(username);
+        goalService.deleteGoal(id, user);
         return ResponseEntity.ok(null);
     }
 
