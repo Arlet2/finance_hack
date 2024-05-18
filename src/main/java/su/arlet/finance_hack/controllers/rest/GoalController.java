@@ -22,6 +22,7 @@ import su.arlet.finance_hack.services.GoalService;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("${api.path}/goals")
@@ -141,17 +142,16 @@ public class GoalController {
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate
     ) {
-        List<Goal> goals;
-        if (isDone != null) {
-            goals = goalService.getGoalsByIsDone(isDone);
-        } else if (deadlineBefore != null) {
-            goals = goalService.getGoalsByDeadlineBefore(deadlineBefore);
-        } else if (startDate != null && endDate != null) {
-            goals = goalService.getGoalsWithinPeriod(startDate, endDate);
-        } else {
-            goals = goalService.getAllGoals();
-        }
-        return ResponseEntity.ok(goals);
-    }
+        List<Goal> goals = goalService.getAllGoals();
 
+        List<Goal> filteredGoals = goals.stream()
+                .filter(goal -> isDone == null || goal.isDone() == isDone)
+                .filter(goal -> deadlineBefore == null || goal.getDeadline().isBefore(deadlineBefore))
+                .filter(goal -> (startDate == null || endDate == null) ||
+                        (goal.getDeadline().isAfter(startDate.minusDays(1)) &&
+                                goal.getDeadline().isBefore(endDate.plusDays(1))))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(filteredGoals);
+    }
 }
