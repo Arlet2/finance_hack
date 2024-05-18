@@ -1,8 +1,6 @@
 package su.arlet.finance_hack.core;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +15,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class Goal {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private long sum;
     private LocalDate deadline;

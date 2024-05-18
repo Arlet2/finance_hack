@@ -19,6 +19,7 @@ import java.util.Set;
 @NoArgsConstructor
 public class Report {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private Timestamp created;
     @Enumerated(EnumType.STRING)

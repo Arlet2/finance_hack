@@ -1,8 +1,6 @@
 package su.arlet.finance_hack.core;
 
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +14,7 @@ import lombok.Setter;
 @Setter
 public class ReportCategory {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String category; // todo: change to Category
     private long sum;
 }
