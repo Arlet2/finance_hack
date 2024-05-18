@@ -68,13 +68,13 @@ public class ReportService {
     public void createNewReport(Period period) {
 
 
-        Report report = new Report();
-        report.setCreated(new Timestamp(System.currentTimeMillis()));
-        report.setTotal(total);
-        report.setReportCategories(reportCategories);
-        report.setPeriod(period);
-
-        return reportRepo.save(report);
+//        Report report = new Report();
+//        report.setCreated(new Timestamp(System.currentTimeMillis()));
+//        report.setTotal(total);
+//        report.setReportCategories(reportCategories);
+//        report.setPeriod(period);
+//
+//        return reportRepo.save(report);
 
         // TODO уведомлялка о новом репорте
     }
