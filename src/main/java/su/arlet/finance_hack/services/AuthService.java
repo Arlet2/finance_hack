@@ -7,15 +7,17 @@ import com.auth0.jwt.interfaces.JWTVerifier;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
+import su.arlet.finance_hack.core.Goal;
+import su.arlet.finance_hack.core.Report;
 import su.arlet.finance_hack.core.User;
-import su.arlet.finance_hack.exceptions.InvalidAuthorizationHeaderException;
-import su.arlet.finance_hack.exceptions.UserAlreadyExistsException;
-import su.arlet.finance_hack.exceptions.UserNotFoundException;
-import su.arlet.finance_hack.exceptions.WrongPasswordException;
+import su.arlet.finance_hack.exceptions.*;
 import su.arlet.finance_hack.repos.UserRepo;
+import su.arlet.finance_hack.utils.SHA1Hasher;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Service
@@ -29,7 +31,14 @@ public class AuthService {
             .withIssuer("finance")
             .build();
 
-    public String registerUser(User user) {
+    public String registerUser(CreateUserEntity createUserEntity) {
+        String hashPassword = SHA1Hasher.toSHA1(createUserEntity.password);
+        var user = new User(
+                createUserEntity.username,
+                hashPassword,
+                createUserEntity.birthday,
+                createUserEntity.email, null, null, 0
+        );
         if (userRepo.existsByUsername(user.getUsername())) {
             throw new UserAlreadyExistsException();
         } else {
@@ -38,10 +47,10 @@ public class AuthService {
         }
     }
 
-    public String loginUser(String username, String hashPassword) {
+    public String loginUser(String username, String password) {
         if (userRepo.existsByUsername(username)) {
-            User user = userRepo.getUserByUsername(username);
-            if (user.getHashPassword().equals(hashPassword)) {
+            User user = getUserByUsername(username);
+            if (user.getHashPassword().equals(SHA1Hasher.toSHA1(password))) {
                 return generateJwtToken();
             } else {
                 throw new WrongPasswordException();
@@ -49,6 +58,15 @@ public class AuthService {
         } else {
             throw new UserNotFoundException();
         }
+    }
+
+    public void delete(String username) {
+        if (!userRepo.existsByUsername(username)) {
+            throw new UserAlreadyExistsException();
+        }
+
+        userRepo.deleteUserByUsername(username);
+
     }
 
     public String generateJwtToken() {
@@ -67,7 +85,7 @@ public class AuthService {
     }
 
 
-    public String getUsernameByHttpRequest(HttpServletRequest req) {
+    public String getUsernameFromHttpRequest(HttpServletRequest req) {
         String auth = req.getHeader("Authorization");
 
         if (auth != null) {
@@ -84,6 +102,116 @@ public class AuthService {
             throw new UserNotFoundException();
 
         return userByUsername;
+    }
+    public void updateUserByUsername(UpdateUserEntity updateUserEntity, String username) {
+        if (!userRepo.existsByUsername(username)) {
+            throw new UserAlreadyExistsException();
+        }
+        User user = getUserByUsername(username);
+
+        String hashPassword = user.getHashPassword();
+        if (updateUserEntity.password != null) {
+            hashPassword = SHA1Hasher.toSHA1(updateUserEntity.password);
+        }
+
+        LocalDate birthday = user.getBirthday();
+        if (updateUserEntity.birthday != null) {
+            birthday = updateUserEntity.birthday;
+        }
+
+        String email = user.getEmail();
+        if (updateUserEntity.email != null) {
+            email = updateUserEntity.email;
+        }
+
+        Goal[] goals = user.getGoals();
+        if (updateUserEntity.goals != null) {
+            goals = updateUserEntity.goals;
+        }
+
+        Report[] reports = user.getReports();
+        if (updateUserEntity.reports != null) {
+            reports = updateUserEntity.reports;
+        }
+
+        long limit = user.getLimit();
+        if (updateUserEntity.limit != null) {
+            limit = updateUserEntity.limit;
+        }
+        User updatedUser = new User(
+                user.getUsername(),
+                hashPassword,
+                birthday,
+                email,
+                goals,
+                reports,
+                limit
+        );
+
+        userRepo.save(updatedUser);
+    }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class CreateUserEntity {
+        private String username;
+
+        private String password;
+
+        private LocalDate birthday;
+
+        private String email;
+
+        public void validate() {
+            if (this.username == null || this.username.isEmpty()) {
+                throw new ValidationErrorException();
+            }
+            if (this.password == null || this.password.isEmpty()) {
+                throw new ValidationErrorException();
+            }
+            if (this.birthday == null) {
+                throw new ValidationErrorException();
+            }
+            if (this.email == null || this.email.isEmpty()) {
+                throw new ValidationErrorException();
+            }
+
+        }
+    }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class UpdateUserEntity {
+
+        private String password;
+
+        private LocalDate birthday;
+
+        private String email;
+
+        private Goal[] goals;
+
+        private Report[] reports;
+
+        private Long limit;
+
+        public void validate() {
+            if (this.email != null && this.email.isEmpty()) {
+                throw new ValidationErrorException();
+            }
+            if (this.limit != null && this.limit < 0) {
+                throw new ValidationErrorException();
+            }
+
+        }
+    }
+
+    public User getUserByUsername(String username) {
+        return userRepo.getUserByUsername(username);
     }
 
 }

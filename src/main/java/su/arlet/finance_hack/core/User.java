@@ -1,5 +1,6 @@
 package su.arlet.finance_hack.core;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,13 +20,14 @@ public class User {
     @Column(name = "username", unique = true, nullable = false)
     private String username;
 
+    @JsonIgnore
     @Column(name = "hashPassword", nullable = false)
     private String hashPassword;
 
     @Column(name = "birthday", nullable = false)
     private LocalDate birthday;
 
-    @Column(name = "email")
+    @Column(name = "email", nullable = false)
     private String email;
 
     @ManyToOne
