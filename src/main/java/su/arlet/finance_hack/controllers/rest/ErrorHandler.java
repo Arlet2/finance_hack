@@ -8,10 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import su.arlet.finance_hack.exceptions.EntityNotFoundException;
-import su.arlet.finance_hack.exceptions.UserAlreadyExistsException;
-import su.arlet.finance_hack.exceptions.UserNotFoundException;
-import su.arlet.finance_hack.exceptions.WasteAlreadyDeletedException;
+import su.arlet.finance_hack.exceptions.*;
 
 @RestControllerAdvice
 class ErrorHandler {
@@ -70,6 +67,12 @@ class ErrorHandler {
     public String handleWasteAlreadyDeletedException(WasteAlreadyDeletedException e) {
         contentErrorCounter.increment();
         return "object has already been deleted";
+    }
+
+    @ExceptionHandler(AuthFailedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String handleAuthFailedException(AuthFailedException e) {
+        return "Access denied / authorization error";
     }
 
 

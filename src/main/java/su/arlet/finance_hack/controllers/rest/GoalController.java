@@ -120,11 +120,8 @@ public class GoalController {
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     public ResponseEntity<?> deleteGoal(@PathVariable Long id, HttpServletRequest servletRequest) {
         String username = authService.getUsernameFromHttpRequest(servletRequest);
-        Goal goal = goalService.getGoalById(id);
-        if (!goal.getUser().getUsername().equals(username)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-        goalService.deleteGoal(id);
+        User user = authService.getByUsername(username);
+        goalService.deleteGoal(id, user);
         return ResponseEntity.ok(null);
     }
 
