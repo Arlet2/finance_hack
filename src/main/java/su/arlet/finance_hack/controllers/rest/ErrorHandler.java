@@ -1,7 +1,7 @@
 package su.arlet.finance_hack.controllers.rest;
 
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.prometheus.client.Counter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,25 +24,25 @@ class ErrorHandler {
 
     @Autowired
     public ErrorHandler(MeterRegistry meterRegistry) {
-        serverErrorCounter = (Counter) meterRegistry.counter("server_error_counter");
-        badRequestErrorCounter = (Counter) meterRegistry.counter("bad_request_error_counter");
-        conflictErrorCounter = (Counter) meterRegistry.counter("conflict_error_counter");
-        unauthorizedErrorCounter = (Counter) meterRegistry.counter("unauthorized_error_counter");
-        contentErrorCounter = (Counter) meterRegistry.counter("content_error_counter");
+        serverErrorCounter = meterRegistry.counter("server_error_counter");
+        badRequestErrorCounter = meterRegistry.counter("bad_request_error_counter");
+        conflictErrorCounter = meterRegistry.counter("conflict_error_counter");
+        unauthorizedErrorCounter = meterRegistry.counter("unauthorized_error_counter");
+        contentErrorCounter = meterRegistry.counter("content_error_counter");
 
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public void handleAllException(Exception e, HttpServletRequest request) {
-        serverErrorCounter.inc();
+        serverErrorCounter.increment();
         System.out.println("Error in " + request.getMethod() + " " + request.getRequestURL() + ": " + e.getMessage());
     }
 
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handleValidationException(ValidationException e) {
-        badRequestErrorCounter.inc();
+        badRequestErrorCounter.increment();
         return "Bad body: " + e.getMessage();
     }
 
@@ -54,21 +54,21 @@ class ErrorHandler {
     @ExceptionHandler(UserAlreadyExistsException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public String handleUserAlreadyExistsException(UserAlreadyExistsException e) {
-        conflictErrorCounter.inc();
+        conflictErrorCounter.increment();
         return "this username has been already taken";
     }
 
     @ExceptionHandler(UserNotFoundException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public String handleUserNotFoundException(UserNotFoundException e) {
-        unauthorizedErrorCounter.inc();
+        unauthorizedErrorCounter.increment();
         return "login is incorrectly set / not set at all";
     }
 
     @ExceptionHandler(WasteAlreadyDeletedException.class)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public String handleWasteAlreadyDeletedException(WasteAlreadyDeletedException e) {
-        contentErrorCounter.inc();
+        contentErrorCounter.increment();
         return "object has already been deleted";
     }
 
