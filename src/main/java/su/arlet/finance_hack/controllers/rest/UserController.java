@@ -82,6 +82,16 @@ public class UserController {
         var username = authService.getUsernameFromHttpRequest(httpServletRequest);
         return new ResponseEntity<>(authService.getByUsername(username), HttpStatus.OK);
     }
+    @GetMapping("/")
+    @Operation(summary = "Get all Users")
+    @ApiResponse(responseCode = "200", description = "Success - found Users", content = {
+            @Content(schema = @Schema(implementation = User.class))
+    }
+    )
+    @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
+    public ResponseEntity<?> getUsers() {
+        return new ResponseEntity<>(authService.getAllUsers(), HttpStatus.OK);
+    }
 
     @PatchMapping("/")
     @Operation(summary = "Update User")

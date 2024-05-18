@@ -18,7 +18,7 @@ import su.arlet.finance_hack.services.PaymentInfoService;
 
 // TODO : использовать общие exceptions
 @RestController
-@RequestMapping("${api_path}/wastes")
+@RequestMapping("${api.path}/wastes")
 @Tag(name = "WASTE API")
 public class WasteController {
 

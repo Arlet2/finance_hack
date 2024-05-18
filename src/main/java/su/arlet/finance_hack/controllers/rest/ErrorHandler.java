@@ -47,6 +47,7 @@ class ErrorHandler {
     public String handleUserAlreadyExistsException(UserAlreadyExistsException e) {
         return "this username has been already taken";
     }
+
 //
 //    @ExceptionHandler(UnauthorizedError::class)
 //    @ResponseStatus(HttpStatus.UNAUTHORIZED)
