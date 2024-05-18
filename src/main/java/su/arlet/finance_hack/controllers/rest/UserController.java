@@ -80,10 +80,10 @@ public class UserController {
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     public ResponseEntity<?> getUserByUsername(HttpServletRequest httpServletRequest) {
         var username = authService.getUsernameFromHttpRequest(httpServletRequest);
-        return new ResponseEntity<>(authService.getUserByUsername(username), HttpStatus.OK);
+        return new ResponseEntity<>(authService.getByUsername(username), HttpStatus.OK);
     }
 
-    @GetMapping("/")
+    @PatchMapping("/")
     @Operation(summary = "Update User")
     @ApiResponse(responseCode = "200", description = "Success - updated User", content = {@Content()})
     @ApiResponse(
