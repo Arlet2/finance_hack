@@ -13,8 +13,6 @@ import su.arlet.finance_hack.repos.PaymentInfoRepo;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -44,11 +42,15 @@ public class PaymentInfoService {
             }
         }
 
-        if (!info.getIsTransfer() && info.getItemCategory() != null) {
-             // TODO : добавить работу с лимитами трат
+        PaymentInfo save = paymentInfoRepo.save(info);
+
+        if (save.getPaymentType() == PaymentType.SAVED) {
+            // TODO : добавить работу с лимитами трат
         }
 
-        PaymentInfo save = paymentInfoRepo.save(info);
+        if (save.getPaymentType() == PaymentType.FOR_GOAL) {
+            // TODO заполнить цель
+        }
         return save.getId();
     }
 
@@ -69,8 +71,12 @@ public class PaymentInfoService {
     public void deleteWaste(Long paymentId) {
         PaymentInfo info = paymentInfoRepo.findById(paymentId).orElseThrow(WasteAlreadyDeletedException::new);
 
-        if (!info.getIsTransfer() && info.getItemCategory() != null) {
+        if (info.getPaymentType() == PaymentType.SAVED) {
             // TODO : добавить работу с лимитами трат
+        }
+
+        if (info.getPaymentType() == PaymentType.FOR_GOAL) {
+            // TODO минус из гола
         }
 
         paymentInfoRepo.deleteById(paymentId);
@@ -81,8 +87,18 @@ public class PaymentInfoService {
     }
 
     public List<PaymentInfo> updateWastes(List<PaymentInfo> paymentInfoList) {
+        paymentInfoList.forEach(PaymentInfo::validate);
 
-        // TODO работа с лимитами и голами
+        for (var paymentInfo : paymentInfoList) {
+            if (paymentInfo.getPaymentType() == PaymentType.SAVED) {
+                // TODO : добавить работу с лимитами трат
+            }
+
+            if (paymentInfo.getPaymentType() == PaymentType.FOR_GOAL) {
+                // TODO минус из гола
+            }
+        }
+
         return paymentInfoRepo.saveAll(paymentInfoList);
     }
 

@@ -46,6 +46,16 @@ public class PaymentInfo {
             throw new ValidationException("Operation time invalid");
         if (time == null)
             time = Timestamp.valueOf(LocalDateTime.now());
+
+        if (!isTransfer && paymentType == PaymentType.FOR_GOAL)
+            throw new ValidationException("FOR_GOAL can't be set without transfer");
+
+        if (id == null && (!isTransfer && itemCategory == null || isTransfer && paymentType != PaymentType.FOR_GOAL)) {
+            paymentType = PaymentType.UNKNOWN;
+        }
+        if (id == null && !isTransfer && itemCategory != null)
+            paymentType = PaymentType.SAVED;
+
     }
 
 }
