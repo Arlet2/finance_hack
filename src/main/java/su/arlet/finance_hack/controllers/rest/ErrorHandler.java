@@ -59,7 +59,7 @@ class ErrorHandler {
     }
 
     @ExceptionHandler(UserNotFoundException.class)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handleUserNotFoundException(UserNotFoundException e) {
         unauthorizedErrorCounter.increment();
         return "login is incorrectly set / not set at all";
