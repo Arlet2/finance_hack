@@ -131,7 +131,7 @@ public class ReportService {
     public Report getByIdBeforeDeleting(Long id) {
         return reportRepo.findById(id).orElseThrow(WasteAlreadyDeletedException::new);
     }
-    public static class ComparisonResult {
+    public class ComparisonResult {
         private Map<String, Long> categoryDifferences;
         private long totalDifference;
 
