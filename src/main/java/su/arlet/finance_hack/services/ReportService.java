@@ -12,6 +12,7 @@ import su.arlet.finance_hack.repos.PaymentInfoRepo;
 import su.arlet.finance_hack.repos.ReportRepo;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -180,10 +181,12 @@ public class ReportService {
         }
 
         public void validate() {
-            if (firstMonth < 0) throw new ValidationException("Month can't be not positive");
-            if (firstYear < 0) throw new ValidationException("Year can't be not positive");
-            if (secondMonth < 0) throw new ValidationException("Month can't be not positive");
-            if (secondYear < 0) throw new ValidationException("Month can't be not positive");
+            int currentYear = LocalDate.now().getYear();
+            int currentMonth = LocalDate.now().getMonthValue();
+            if (firstMonth != currentMonth) throw new ValidationException("Month can't be not positive");
+            if (firstYear != currentYear) throw new ValidationException("Year can't be not positive");
+            if (secondMonth != currentMonth) throw new ValidationException("Month can't be not positive");
+            if (secondYear != currentYear) throw new ValidationException("Month can't be not positive");
             if (Period.isEnumContains(period)) throw new ValidationException("period can't be not in enum");
         }
     }
