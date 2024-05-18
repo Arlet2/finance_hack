@@ -24,7 +24,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Setter
 @Getter
-public class AuthService {
+public class AuthService{
     private final UserRepo userRepo;
     private final Algorithm algorithm = Algorithm.HMAC256("Shulga");
     private final JWTVerifier verifier = JWT.require(algorithm)
@@ -37,7 +37,7 @@ public class AuthService {
                 createUserEntity.username,
                 hashPassword,
                 createUserEntity.birthday,
-                createUserEntity.email, null, null, null
+                createUserEntity.email, null, null, 0
         );
         if (userRepo.existsByUsername(user.getUsername())) {
             throw new UserAlreadyExistsException();
@@ -49,7 +49,7 @@ public class AuthService {
 
     public String loginUser(String username, String password) {
         if (userRepo.existsByUsername(username)) {
-            User user = userRepo.getUserByUsername(username);
+            User user = getUserByUsername(username);
             if (user.getHashPassword().equals(SHA1Hasher.toSHA1(password))) {
                 return generateJwtToken();
             } else {
@@ -103,11 +103,59 @@ public class AuthService {
 
         return userByUsername;
     }
+    public void updateUserByUsername(UpdateUserEntity updateUserEntity, String username) {
+        if (!userRepo.existsByUsername(username)) {
+            throw new UserAlreadyExistsException();
+        }
+        User user = getUserByUsername(username);
+
+        String hashPassword = user.getHashPassword();
+        if (updateUserEntity.hashPassword != null) {
+            hashPassword = updateUserEntity.hashPassword;
+        }
+
+        LocalDate birthday = user.getBirthday();
+        if (updateUserEntity.birthday != null) {
+            birthday = updateUserEntity.birthday;
+        }
+
+        String email = user.getEmail();
+        if (updateUserEntity.email != null) {
+            email = updateUserEntity.email;
+        }
+
+        Goal[] goals = user.getGoals();
+        if (updateUserEntity.goals != null) {
+            goals = updateUserEntity.goals;
+        }
+
+        Report[] reports = user.getReports();
+        if (updateUserEntity.reports != null) {
+            reports = updateUserEntity.reports;
+        }
+
+        long limit = user.getLimit();
+        if (updateUserEntity.limit != null) {
+            limit = updateUserEntity.limit;
+        }
+        User updatedUser = new User(
+                user.getUsername(),
+                hashPassword,
+                birthday,
+                email,
+                goals,
+                reports,
+                limit
+        );
+
+        userRepo.save(updatedUser);
+    }
+
     @Getter
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
-    public class CreateUserEntity {
+    public static class CreateUserEntity {
         private String username;
 
         private String password;
@@ -117,17 +165,17 @@ public class AuthService {
         private String email;
 
         public void validate() {
-            if (!(this.username != null && !this.username.isEmpty())) {
-                throw new WrongUserdataException();
+            if (this.username == null || this.username.isEmpty()) {
+                throw new ValidationErrorException();
             }
-            if (!(this.password != null && !this.password.isEmpty())) {
-                throw new WrongUserdataException();
+            if (this.password == null || this.password.isEmpty()) {
+                throw new ValidationErrorException();
             }
             if(this.birthday == null) {
-                throw new WrongUserdataException();
+                throw new ValidationErrorException();
             }
-            if (!(this.email != null && !this.email.isEmpty())) {
-                throw new WrongUserdataException();
+            if (this.email == null || this.email.isEmpty()) {
+                throw new ValidationErrorException();
             }
 
         }
@@ -137,7 +185,8 @@ public class AuthService {
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
-    public class UpdateUserEntity {
+    public static class UpdateUserEntity {
+
         private String hashPassword;
 
         private LocalDate birthday;
@@ -151,26 +200,18 @@ public class AuthService {
         private Long limit;
 
         public void validate() {
-            if (!(this.hashPassword != null && !this.hashPassword.isEmpty())) {
-                throw new WrongUserdataException();
+            if (this.email != null && this.email.isEmpty()) {
+                throw new ValidationErrorException();
             }
-            if(this.birthday == null) {
-                throw new WrongUserdataException();
-            }
-            if (!(this.email != null && !this.email.isEmpty())) {
-                throw new WrongUserdataException();
-            }
-            if (!(this.limit != null && this.limit > 0)) {
-                throw new WrongUserdataException();
-            }
-            if (!(this.goals != null && this.goals.length > 0)) {
-                throw new WrongUserdataException();
-            }
-            if (!(this.reports != null && this.reports.length > 0)) {
-                throw new WrongUserdataException();
+            if (this.limit != null && this.limit < 0) {
+                throw new ValidationErrorException();
             }
 
         }
+    }
+
+    public User getUserByUsername(String username) {
+        return userRepo.getUserByUsername(username);
     }
 
 }

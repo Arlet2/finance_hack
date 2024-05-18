@@ -27,7 +27,7 @@ public class User {
     @Column(name = "birthday", nullable = false)
     private LocalDate birthday;
 
-    @Column(name = "email")
+    @Column(name = "email", nullable = false)
     private String email;
 
     @ManyToOne
@@ -37,5 +37,5 @@ public class User {
     private Report[] reports;
 
     @Column(name = "user_limit", nullable = false)
-    private Long limit;
+    private long limit;
 }

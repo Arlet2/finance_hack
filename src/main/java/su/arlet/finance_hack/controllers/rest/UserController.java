@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -65,12 +66,11 @@ public class UserController {
     ) {
 
         String jwtToken = authService.loginUser(username, password);
-
         return ResponseEntity.status(HttpStatus.CREATED).body(jwtToken);
     }
 
 
-    @GetMapping("/{username}")
+    @GetMapping("/")
     @Operation(summary = "Get User by username")
     @ApiResponse(responseCode = "200", description = "Success - found User", content = {
             @Content(schema = @Schema(implementation = User.class))
@@ -78,8 +78,9 @@ public class UserController {
     )
     @ApiResponse(responseCode = "404", description = "Not found - User not found")
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
-    public ResponseEntity<?> getUserByUsername(@PathVariable String username) {
-        return new ResponseEntity<>(new User(), HttpStatus.OK);
+    public ResponseEntity<?> getUserByUsername(HttpServletRequest httpServletRequest) {
+        var username = authService.getUsernameFromHttpRequest(httpServletRequest);
+        return new ResponseEntity<>(authService.getUserByUsername(username), HttpStatus.OK);
     }
 
     @GetMapping("/")
@@ -93,19 +94,22 @@ public class UserController {
     @ApiResponse(responseCode = "404", description = "Not found - User not found", content = {@Content()})
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     public ResponseEntity<?> updateUser(
-            @RequestBody AuthService.UpdateUserEntity updateUserEntity
+            @RequestBody AuthService.UpdateUserEntity updateUserEntity, HttpServletRequest httpServletRequest
     ) {
+        var username = authService.getUsernameFromHttpRequest(httpServletRequest);
         updateUserEntity.validate();
+        authService.updateUserByUsername(updateUserEntity, username);
 
         return ResponseEntity.ok(null);
     }
 
-    @DeleteMapping("/{username}")
+    @DeleteMapping("/")
     @Operation(summary = "Delete User")
     @ApiResponse(responseCode = "200", description = "Success - deleted User", content = {@Content()})
     @ApiResponse(responseCode = "204", description = "No content", content = {@Content()})
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
-    public ResponseEntity<?> deleteUser(@PathVariable String username) {
+    public ResponseEntity<?> deleteUser(HttpServletRequest httpServletRequest) {
+        var username = authService.getUsernameFromHttpRequest(httpServletRequest);
         authService.delete(username);
         return ResponseEntity.ok(null);
     }
