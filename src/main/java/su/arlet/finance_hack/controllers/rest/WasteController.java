@@ -27,13 +27,13 @@ public class WasteController {
     private final PaymentInfoService paymentInfoService;
     private final AuthService authService;
 
-    private final Counter bankFaultCounter;
+    //private final Counter bankFaultCounter;
 
     @Autowired
     public WasteController(PaymentInfoService paymentInfoService, AuthService authService, MeterRegistry meterRegistry) {
         this.paymentInfoService = paymentInfoService;
         this.authService = authService;
-        bankFaultCounter = (Counter) meterRegistry.counter("bank_fault_counter");
+        //bankFaultCounter = (Counter) meterRegistry.counter("bank_fault_counter");
     }
 
     @PostMapping("/{username}")
@@ -50,7 +50,7 @@ public class WasteController {
         User user = authService.getByUsername(username);
 
         if (info == null) {
-            bankFaultCounter.inc();
+            //bankFaultCounter.inc();
             throw new ValidationException("PaymentInfo is not set");
         }
 

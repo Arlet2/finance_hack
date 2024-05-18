@@ -1,7 +1,7 @@
 package su.arlet.finance_hack.controllers.rest;
 
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.prometheus.client.Counter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -29,7 +29,7 @@ public class ReportController {
     @Autowired
     public ReportController(ReportService reportService, MeterRegistry meterRegistry) {
         this.reportService = reportService;
-        reportsCounter = (Counter) meterRegistry.counter("report_counter");
+        reportsCounter = meterRegistry.counter("report_counter");
     }
 
     @GetMapping("/")
@@ -38,7 +38,7 @@ public class ReportController {
             @Content(schema = @Schema(implementation = Report.class))})
     public ResponseEntity<List<Report>> getReports(@RequestParam String periodType) {
         List<Report> reports = reportService.getReports(periodType);
-        reportsCounter.inc();
+        reportsCounter.increment();
         return ResponseEntity.ok(reports);
     }
 //    @GetMapping("/date")
