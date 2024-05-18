@@ -63,7 +63,7 @@ public class UserController {
     @ApiResponse(responseCode = "500", description = "Server error", content = {})
     public ResponseEntity<?> login(
             @RequestBody AuthService.LoginUser loginUser
-            ) {
+    ) {
         String jwtToken = authService.loginUser(loginUser.getUsername(), loginUser.getPassword());
         return ResponseEntity.status(HttpStatus.CREATED).body(jwtToken);
     }

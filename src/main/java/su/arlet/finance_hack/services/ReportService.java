@@ -5,9 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import su.arlet.finance_hack.controllers.rest.ValidationException;
 import su.arlet.finance_hack.core.*;
-import su.arlet.finance_hack.core.Report;
-import su.arlet.finance_hack.core.ReportCategory;
-import su.arlet.finance_hack.core.ReportComparison;
 import su.arlet.finance_hack.core.enums.Period;
 import su.arlet.finance_hack.exceptions.RepoAlreadyDeleteException;
 import su.arlet.finance_hack.exceptions.WasteAlreadyDeletedException;
@@ -27,9 +24,9 @@ public class ReportService {
     private final AuthService authService;
 
     public List<Report> getReports(String periodType) {
-        if (periodType==null) {
+        if (periodType == null) {
             Timestamp date = new Timestamp(System.currentTimeMillis());
-            return  reportRepo.findByCreated(date);
+            return reportRepo.findByCreated(date);
         }
         Timestamp startDate = getStartDateByPeriod(periodType);
         Timestamp endDate = new Timestamp(System.currentTimeMillis());
@@ -37,7 +34,7 @@ public class ReportService {
     }
 
 
-    public void deleteReport (Long id) {
+    public void deleteReport(Long id) {
         Report report = reportRepo.findById(id).orElseThrow(RepoAlreadyDeleteException::new);
         reportRepo.deleteById(id);
     }
@@ -142,6 +139,7 @@ public class ReportService {
     public Report getByIdBeforeDeleting(Long id) {
         return reportRepo.findById(id).orElseThrow(WasteAlreadyDeletedException::new);
     }
+
     public static class ComparisonResult {
         private Map<String, Long> categoryDifferences;
         private long totalDifference;
@@ -168,6 +166,7 @@ public class ReportService {
         private int secondMonth;
         private int secondYear;
         private Period period;
+
         public DateAndPeriod(int firstMonth, int firstYear, int secondMonth, int secondYear, String periodType) {
             this.firstMonth = firstMonth;
             this.firstYear = firstYear;

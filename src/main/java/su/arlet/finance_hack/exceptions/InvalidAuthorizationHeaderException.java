@@ -1,4 +1,4 @@
 package su.arlet.finance_hack.exceptions;
 
-public class InvalidAuthorizationHeaderException extends RuntimeException{
+public class InvalidAuthorizationHeaderException extends RuntimeException {
 }

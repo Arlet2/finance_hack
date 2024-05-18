@@ -1,10 +1,5 @@
 package su.arlet.finance_hack.core;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 public class ReportComparison {
     private final Report firstReport;
     private final Report secondReport;

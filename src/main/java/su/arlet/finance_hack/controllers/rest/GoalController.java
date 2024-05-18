@@ -16,12 +16,9 @@ import su.arlet.finance_hack.core.User;
 import su.arlet.finance_hack.services.AuthService;
 import su.arlet.finance_hack.services.GoalService;
 
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import java.util.Map;
 
 
 @RestController

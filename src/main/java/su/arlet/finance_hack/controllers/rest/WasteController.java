@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import su.arlet.finance_hack.core.PaymentInfo;
 import su.arlet.finance_hack.core.User;
 import su.arlet.finance_hack.exceptions.UserNotFoundException;
-import su.arlet.finance_hack.repos.UserRepo;
 import su.arlet.finance_hack.services.AuthService;
 import su.arlet.finance_hack.services.PaymentInfoService;
 

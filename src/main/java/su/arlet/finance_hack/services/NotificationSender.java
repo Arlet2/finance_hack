@@ -14,18 +14,13 @@ public class NotificationSender {
 
     public Future<?> sendNotification(Notifitacion notifitacion) {
         return executorService.submit(() ->
-            send(notifitacion)
+                send(notifitacion)
         );
     }
 
     private void send(Notifitacion notifitacion) {
         // do something...
     }
-
-
-
-
-
 
 
 }

@@ -13,6 +13,7 @@ import java.util.List;
 public interface ReportRepo extends JpaRepository<Report, Long> {
 
     List<Report> findByCreated(Timestamp created);
+
     List<Report> findAllByCreatedBetween(Timestamp startDate, Timestamp endDate);
 
     @Query("SELECT r FROM Report r WHERE FUNCTION('MONTH', r.created) = ?1 AND FUNCTION('YEAR', r.created) = ?2 AND r.period = ?3")
