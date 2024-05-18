@@ -1,10 +1,13 @@
 package su.arlet.finance_hack.controllers.rest;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.prometheus.client.Counter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import su.arlet.finance_hack.core.Finance;
@@ -12,6 +15,7 @@ import su.arlet.finance_hack.core.Report;
 import su.arlet.finance_hack.core.ReportComparison;
 import su.arlet.finance_hack.core.enums.Period;
 import su.arlet.finance_hack.exceptions.UserNotFoundException;
+import su.arlet.finance_hack.repos.UserRepo;
 import su.arlet.finance_hack.services.ReportService;
 
 import java.sql.Timestamp;
@@ -24,8 +28,12 @@ import java.util.Optional;
 public class ReportController {
     private final ReportService reportService;
 
-    public ReportController(ReportService reportService) {
+    private final Counter reportsCounter;
+
+    @Autowired
+    public ReportController(ReportService reportService, MeterRegistry meterRegistry) {
         this.reportService = reportService;
+        reportsCounter = (Counter) meterRegistry.counter("report_counter");
     }
 
     @GetMapping("/")
@@ -34,6 +42,7 @@ public class ReportController {
             @Content(schema = @Schema(implementation = Report.class))})
     public ResponseEntity<List<Report>> getReports(@RequestParam String periodType) {
         List<Report> reports = reportService.getReports(periodType);
+        reportsCounter.inc();
         return ResponseEntity.ok(reports);
     }
 //    @GetMapping("/date")

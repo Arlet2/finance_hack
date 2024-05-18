@@ -1,5 +1,7 @@
 package su.arlet.finance_hack.services;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.prometheus.client.Counter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import su.arlet.finance_hack.core.ItemCategory;
@@ -10,6 +12,7 @@ import su.arlet.finance_hack.core.enums.PaymentType;
 import su.arlet.finance_hack.exceptions.WasteAlreadyDeletedException;
 import su.arlet.finance_hack.repos.ItemCategoryRepo;
 import su.arlet.finance_hack.repos.PaymentInfoRepo;
+import su.arlet.finance_hack.repos.UserRepo;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,10 +24,13 @@ public class PaymentInfoService {
     private final PaymentInfoRepo paymentInfoRepo;
     private final ItemCategoryRepo itemCategoryRepo;
 
+    private final Counter wasteCounter;
+
     @Autowired
-    public PaymentInfoService(PaymentInfoRepo paymentInfoRepo, ItemCategoryRepo itemCategoryRepo) {
+    public PaymentInfoService(PaymentInfoRepo paymentInfoRepo, ItemCategoryRepo itemCategoryRepo, MeterRegistry meterRegistry, UserRepo userRepo) {
         this.paymentInfoRepo = paymentInfoRepo;
         this.itemCategoryRepo = itemCategoryRepo;
+        wasteCounter = (Counter) meterRegistry.counter("waste_counter");
     }
 
     public Long addWaste(PaymentInfo info) {
@@ -39,6 +45,7 @@ public class PaymentInfoService {
             } else {
                 ItemCategory itemCategory = itemCategoryRepo.save(info.getItemCategory());
                 info.setItemCategory(itemCategory);
+                wasteCounter.inc();
             }
         }
 

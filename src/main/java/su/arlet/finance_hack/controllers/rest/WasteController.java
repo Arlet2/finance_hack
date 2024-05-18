@@ -1,5 +1,7 @@
 package su.arlet.finance_hack.controllers.rest;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.prometheus.client.Counter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import su.arlet.finance_hack.core.PaymentInfo;
 import su.arlet.finance_hack.core.User;
 import su.arlet.finance_hack.exceptions.UserNotFoundException;
+import su.arlet.finance_hack.repos.UserRepo;
 import su.arlet.finance_hack.services.AuthService;
 import su.arlet.finance_hack.services.PaymentInfoService;
 
@@ -25,10 +28,13 @@ public class WasteController {
     private final PaymentInfoService paymentInfoService;
     private final AuthService authService;
 
+    private final Counter bankFaultCounter;
+
     @Autowired
-    public WasteController(PaymentInfoService paymentInfoService, AuthService authService) {
+    public WasteController(PaymentInfoService paymentInfoService, AuthService authService, MeterRegistry meterRegistry) {
         this.paymentInfoService = paymentInfoService;
         this.authService = authService;
+        bankFaultCounter = (Counter) meterRegistry.counter("bank_fault_counter");
     }
 
     @PostMapping("/{username}")
@@ -44,8 +50,10 @@ public class WasteController {
 
         User user = authService.getByUsername(username);
 
-        if (info == null)
+        if (info == null) {
+            bankFaultCounter.inc();
             throw new ValidationException("PaymentInfo is not set");
+        }
 
         info.setUser(user);
         return new ResponseEntity<>(paymentInfoService.addWaste(info), HttpStatus.OK);
