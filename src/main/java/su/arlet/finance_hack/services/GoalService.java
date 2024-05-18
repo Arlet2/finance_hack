@@ -1,7 +1,10 @@
 package su.arlet.finance_hack.services;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import su.arlet.finance_hack.controllers.rest.ValidationException;
 import su.arlet.finance_hack.core.Goal;
 import su.arlet.finance_hack.exceptions.EntityWasAlreadyRemovedException;
 import su.arlet.finance_hack.exceptions.EntityNotFoundException;
@@ -56,11 +59,13 @@ public class GoalService {
     public List<Goal> getGoalsWithinPeriod(LocalDate startDate, LocalDate endDate) {
         return goalRepo.findByDeadlineBetween(startDate, endDate);
     }
-    public Goal AddContributionToGoal (Long id, long contribution) {
+
+    public Goal AddContributionToGoal(Long id, long contribution) {
         Goal goal = goalRepo.findById(id).orElseThrow(EntityNotFoundException::new);
         goal.setCurrentTotal(goal.getCurrentTotal() + contribution);
         return goalRepo.save(goal);
     }
+
     public Goal updateGoal(Goal goalDetails) {
         Goal goal = goalRepo.findById(goalDetails.getId()).orElseThrow(EntityNotFoundException::new);
         return goalRepo.save(goal);
@@ -72,6 +77,7 @@ public class GoalService {
         long monthsRemaining = ChronoUnit.MONTHS.between(LocalDate.now(), goal.getDeadline());
         return (double) remainingSum / monthsRemaining;
     }
+    /*
     public Map<String, Long> getGoalAchievementStats() {
         long totalGoals = goalRepo.count();
         //long completedGoals = goalRepo.countByIsDone(true);
@@ -83,5 +89,57 @@ public class GoalService {
         //stats.put("uncompletedGoals", uncompletedGoals);
 
         return stats;
+    }
+     */
+
+    @Getter
+    @Setter
+    public class CreateGoalEntity {
+
+        private Long sum;
+        private LocalDate deadline;
+        private String name;
+        private String description;
+
+        public void validate() {
+            if (!(this.sum != null && this.sum > 0)) {
+                throw new ValidationException("sum undefined");
+            }
+            if (this.deadline == null) {
+                throw new ValidationException("deadline undefined");
+            }
+            if (!(this.name != null && !this.name.isEmpty())) {
+                throw new ValidationException("name undefined");
+            }
+
+
+        }
+
+        @Getter
+        @Setter
+        public class UpdateGoalEntity {
+
+            private Long sum;
+            private LocalDate deadline;
+            private String name;
+            private String description;
+
+            public void validate() {
+                if (this.deadline == null
+                        || this.deadline.compareTo(LocalDate.now()) < 0) {
+                    throw new ValidationException("deadline undefined");
+                }
+                if (!(this.sum != null && this.sum > 0)) {
+                    throw new ValidationException("sum undefined");
+                }
+                if (!(this.name != null && !this.name.isEmpty())) {
+                    throw new ValidationException("name undefined");
+                }
+                if (!(this.description != null && !this.description.isEmpty())) {
+                    throw new ValidationException("description undefined");
+                }
+            }
+        }
+
     }
 }

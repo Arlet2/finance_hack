@@ -1,6 +1,7 @@
 package su.arlet.finance_hack.controllers.rest;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,10 +16,12 @@ import org.springframework.web.bind.annotation.*;
 import su.arlet.finance_hack.core.Goal;
 import su.arlet.finance_hack.core.User;
 import su.arlet.finance_hack.exceptions.EntityNotFoundException;
+import su.arlet.finance_hack.exceptions.WrongGoalDataException;
 import su.arlet.finance_hack.services.AuthService;
 import su.arlet.finance_hack.services.GoalService;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("${api.path}/goals")
@@ -35,36 +38,6 @@ public class GoalController {
         this.authService = authService;
     }
 
-    @Getter
-    @Setter
-    public class CreateGoalEntity {
-
-        private Long sum;
-        private LocalDate deadline;
-        private String name;
-        private String description;
-
-        public void validate() {
-
-        }
-
-
-    }
-
-    @Getter
-    @Setter
-    public class UpdateGoalEntity {
-
-        private Long sum;
-        private LocalDate deadline;
-        private String name;
-
-        public void validate() {
-
-        }
-
-        }
-
 
 
     @GetMapping("/{id}")
@@ -75,16 +48,11 @@ public class GoalController {
     )
     @ApiResponse(responseCode = "404", description = "Not found - goal not found")
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
-    public ResponseEntity<Goal> getGoalByID(@PathVariable Long id) {public ResponseEntity<Goal> getGoalByID(@PathVariable Long id)
-        {
-            try {
+    public ResponseEntity<Goal> getGoalByID(@PathVariable Long id) {
                 Goal goal = goalService.getGoalById(id);
                 return ResponseEntity.ok(goal);
-            } catch (EntityNotFoundException e) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-            }
         }
-    }
+
 
     @PostMapping("/")
     @Operation(summary = "Create a new goal")
@@ -99,12 +67,10 @@ public class GoalController {
     )
     @ApiResponse(responseCode = "404", description = "Not found - goal not found")
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
-    public ResponseEntity<?> createGoal(@RequestBody CreateGoalEntity createGoalEntity, HttpServletRequest servletRequest) {
+    public ResponseEntity<?> createGoal(@RequestBody GoalService.CreateGoalEntity createGoalEntity, HttpServletRequest servletRequest) {
         String username = authService.getUsernameByHttpRequest(servletRequest);
-        if (username == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-        User user = authService.get____(username); // где сраная функци
+        createGoalEntity.validate();
+        User user = authService.getByUsername(username);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
@@ -127,9 +93,10 @@ public class GoalController {
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     public ResponseEntity<Goal> updateGoal(
             @PathVariable Long id,
-            @RequestBody UpdateGoalEntity updateGoalEntity
+            @RequestBody GoalService.CreateGoalEntity.UpdateGoalEntity updateGoalEntity
     ) {
         Goal goal = goalService.getGoalById(id);
+        updateGoalEntity.validate();
         if (updateGoalEntity.getSum() != null) {
             goal.setSum(updateGoalEntity.getSum());
         }
@@ -144,7 +111,6 @@ public class GoalController {
     @Operation(summary = "Delete goal")
     @ApiResponse(responseCode = "200", description = "Success - deleted goal", content = {@Content()})
     @ApiResponse(responseCode = "204", description = "Goal already removed", content = {@Content()})
-    // TODO : посмотри как сделана у Зотова Артема обработка ошибок ExceptionHandler
     @ApiResponse(responseCode = "403", description = "Forbidden - user does not own the goal")
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     public ResponseEntity<?> deleteGoal(@PathVariable Long id, HttpServletRequest servletRequest) {
@@ -156,4 +122,31 @@ public class GoalController {
         goalService.deleteGoal(id);
         return ResponseEntity.ok(null);
     }
+
+    @GetMapping("/")
+    @ApiResponse(responseCode = "200", description = "OK",
+            content = {
+                    @Content(array = @ArraySchema(schema = @Schema(implementation = Goal.class)))
+            })
+    @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
+    @Operation(summary = "Get goals by filters")
+    public ResponseEntity<List<Goal>> getGoals(
+            @RequestParam(required = false) Boolean isDone,
+            @RequestParam(required = false) LocalDate deadlineBefore,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate
+    ) {
+        List<Goal> goals;
+        if (isDone != null) {
+            goals = goalService.getGoalsByIsDone(isDone);
+        } else if (deadlineBefore != null) {
+            goals = goalService.getGoalsByDeadlineBefore(deadlineBefore);
+        } else if (startDate != null && endDate != null) {
+            goals = goalService.getGoalsWithinPeriod(startDate, endDate);
+        } else {
+            goals = goalService.getAllGoals();
+        }
+        return ResponseEntity.ok(goals);
+    }
+
 }
