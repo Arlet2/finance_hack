@@ -70,7 +70,7 @@ public class UserController {
     }
 
 
-    @GetMapping("/")
+    @GetMapping("/me")
     @Operation(summary = "Get User by username")
     @ApiResponse(responseCode = "200", description = "Success - found User", content = {
             @Content(schema = @Schema(implementation = User.class))
@@ -82,6 +82,7 @@ public class UserController {
         var username = authService.getUsernameFromHttpRequest(httpServletRequest);
         return new ResponseEntity<>(authService.getByUsername(username), HttpStatus.OK);
     }
+
     @GetMapping("/")
     @Operation(summary = "Get all Users")
     @ApiResponse(responseCode = "200", description = "Success - found Users", content = {
