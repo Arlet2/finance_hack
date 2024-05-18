@@ -4,15 +4,13 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import su.arlet.finance_hack.core.ItemCategory;
-import su.arlet.finance_hack.core.PaymentInfo;
-import su.arlet.finance_hack.core.PaymentInfoFilter;
-import su.arlet.finance_hack.core.User;
+import su.arlet.finance_hack.controllers.rest.ValidationException;
+import su.arlet.finance_hack.core.*;
 import su.arlet.finance_hack.core.enums.PaymentType;
+import su.arlet.finance_hack.exceptions.InvalidPaymentInfoException;
 import su.arlet.finance_hack.exceptions.WasteAlreadyDeletedException;
 import su.arlet.finance_hack.repos.ItemCategoryRepo;
 import su.arlet.finance_hack.repos.PaymentInfoRepo;
-import su.arlet.finance_hack.repos.UserRepo;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,13 +21,15 @@ public class PaymentInfoService {
 
     private final PaymentInfoRepo paymentInfoRepo;
     private final ItemCategoryRepo itemCategoryRepo;
+    private final GoalService goalService;
 
     private final Counter wasteCounter;
 
     @Autowired
-    public PaymentInfoService(PaymentInfoRepo paymentInfoRepo, ItemCategoryRepo itemCategoryRepo, MeterRegistry meterRegistry) {
+    public PaymentInfoService(PaymentInfoRepo paymentInfoRepo, ItemCategoryRepo itemCategoryRepo, GoalService goalService, MeterRegistry meterRegistry) {
         this.paymentInfoRepo = paymentInfoRepo;
         this.itemCategoryRepo = itemCategoryRepo;
+        this.goalService = goalService;
         wasteCounter = meterRegistry.counter("waste_counter");
     }
 
@@ -56,7 +56,8 @@ public class PaymentInfoService {
         }
 
         if (save.getPaymentType() == PaymentType.FOR_GOAL) {
-            // TODO заполнить цель
+            List<Goal> goals = calculateGoals(goalService.getGoalsByUser(info.getUser()), save.getSum());
+            goals.forEach(goalService::updateGoal);
         }
         return save.getId();
     }
@@ -82,8 +83,9 @@ public class PaymentInfoService {
             // TODO : добавить работу с лимитами трат
         }
 
+        // TODO: что делать в случае отката банком операции с типом FOR_GOAL? Пока просто не будем поддерживать операцию удаления
         if (info.getPaymentType() == PaymentType.FOR_GOAL) {
-            // TODO минус из гола
+            throw new ValidationException("you cannot delete paymentInfo that has been sent to the goal");
         }
 
         paymentInfoRepo.deleteById(paymentId);
@@ -96,17 +98,37 @@ public class PaymentInfoService {
     public List<PaymentInfo> updateWastes(List<PaymentInfo> paymentInfoList) {
         paymentInfoList.forEach(PaymentInfo::validate);
 
+        long freeMoney = 0;
+
         for (var paymentInfo : paymentInfoList) {
             if (paymentInfo.getPaymentType() == PaymentType.SAVED) {
                 // TODO : добавить работу с лимитами трат
             }
 
-            if (paymentInfo.getPaymentType() == PaymentType.FOR_GOAL) {
-                // TODO минус из гола
-            }
+            if (paymentInfo.getPaymentType() == PaymentType.FOR_GOAL)
+                freeMoney += paymentInfo.getSum();
+
+        }
+        if (freeMoney > 0) {
+            List<Goal> goals = calculateGoals(goalService.getGoalsByUser(paymentInfoList.get(0).getUser()), freeMoney);
+            goals.forEach(goalService::updateGoal);
         }
 
         return paymentInfoRepo.saveAll(paymentInfoList);
+    }
+
+    private List<Goal> calculateGoals(List<Goal> goals, long freeMoney) {
+        long prioritySum = 0;
+        for (var goal : goals)
+            prioritySum += goal.getPriority();
+
+        for (var goal : goals) {
+            long moneyToGoal = freeMoney * (goal.getPriority() / prioritySum);
+            goal.setCurrentTotal(goal.getCurrentTotal() + moneyToGoal);
+            freeMoney -= moneyToGoal;
+            prioritySum -= goal.getPriority();
+        }
+        return goals;
     }
 
 }
