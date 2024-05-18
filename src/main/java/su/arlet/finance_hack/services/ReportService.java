@@ -4,21 +4,23 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import su.arlet.finance_hack.controllers.rest.ValidationException;
-import su.arlet.finance_hack.core.Report;
-import su.arlet.finance_hack.core.ReportCategory;
-import su.arlet.finance_hack.core.ReportComparison;
+import su.arlet.finance_hack.core.*;
 import su.arlet.finance_hack.core.enums.Period;
 import su.arlet.finance_hack.exceptions.RepoAlreadyDeleteException;
 import su.arlet.finance_hack.exceptions.WasteAlreadyDeletedException;
+import su.arlet.finance_hack.repos.PaymentInfoRepo;
 import su.arlet.finance_hack.repos.ReportRepo;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ReportService {
     private final ReportRepo reportRepo;
+    private final PaymentInfoRepo paymentInfoRepo;
+    private final AuthService authService;
 
     public List<Report> getReports(String periodType) {
         if (periodType==null) {
@@ -59,7 +61,29 @@ public class ReportService {
 
     public void createNewReport(Period period) {
 
+        List<User> users = authService.getAllUsers();
+        for (User user : users) {
+            List<PaymentInfo> payments = paymentInfoRepo.findByUser(user);
 
+            long totalSum = payments.stream().mapToLong(PaymentInfo::getSum).sum();
+            Map<String, Long> categorySums = payments.stream()
+                    .collect(Collectors.groupingBy(
+                            payment -> payment.getItemCategory().getName(),
+                            Collectors.summingLong(PaymentInfo::getSum)
+                    ));
+
+            Set<ReportCategory> reportCategories = categorySums.entrySet().stream()
+                    .map(entry -> new ReportCategory(entry.getKey(), entry.getValue()))
+                    .collect(Collectors.toSet());
+
+            Report report = new Report();
+            report.setCreated(new Timestamp(System.currentTimeMillis()));
+            report.setPeriod(period);
+            report.setTotal(totalSum);
+            report.setReportCategories(reportCategories);
+            report.setUser(user);
+            reportRepo.save(report);
+        }
 //        Report report = new Report();
 //        report.setCreated(new Timestamp(System.currentTimeMillis()));
 //        report.setTotal(total);
