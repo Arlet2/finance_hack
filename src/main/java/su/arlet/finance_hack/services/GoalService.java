@@ -134,20 +134,28 @@ public class GoalService {
 
         public void validate() {
 <<<<<<< HEAD
+<<<<<<< HEAD
             if (this.sum == null || this.sum < 0) {
 =======
             if (!(this.sum != null && this.sum > 0)) {
 >>>>>>> cdcd9a3 (goals controller done (honestly, no))
+=======
+            if (this.sum == null || this.sum < 0) {
+>>>>>>> e46e6c2 (corrected validate)
                 throw new ValidationException("sum undefined");
             }
             if (this.deadline == null) {
                 throw new ValidationException("deadline undefined");
             }
 <<<<<<< HEAD
+<<<<<<< HEAD
             if (this.name == null || this.name.isEmpty()) {
 =======
             if (!(this.name != null && !this.name.isEmpty())) {
 >>>>>>> cdcd9a3 (goals controller done (honestly, no))
+=======
+            if (this.name == null || this.name.isEmpty()) {
+>>>>>>> e46e6c2 (corrected validate)
                 throw new ValidationException("name undefined");
             }
 
@@ -165,6 +173,7 @@ public class GoalService {
 
             public void validate() {
 <<<<<<< HEAD
+<<<<<<< HEAD
                 if (this.deadline != null
                         || this.deadline.compareTo(LocalDate.now()) < 0) {
                     throw new ValidationException("deadline undefined");
@@ -174,12 +183,16 @@ public class GoalService {
                 }
 =======
                 if (this.deadline == null
+=======
+                if (this.deadline != null
+>>>>>>> e46e6c2 (corrected validate)
                         || this.deadline.compareTo(LocalDate.now()) < 0) {
                     throw new ValidationException("deadline undefined");
                 }
-                if (!(this.sum != null && this.sum > 0)) {
+                if (this.sum != null && this.sum < 0) {
                     throw new ValidationException("sum undefined");
                 }
+<<<<<<< HEAD
                 if (!(this.name != null && !this.name.isEmpty())) {
                     throw new ValidationException("name undefined");
                 }
@@ -187,6 +200,8 @@ public class GoalService {
                     throw new ValidationException("description undefined");
                 }
 >>>>>>> cdcd9a3 (goals controller done (honestly, no))
+=======
+>>>>>>> e46e6c2 (corrected validate)
             }
         }
 
