@@ -1,13 +1,15 @@
 package su.arlet.finance_hack.core;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import su.arlet.finance_hack.core.enums.Period;
 
 import java.sql.Timestamp;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Setter
@@ -17,9 +19,12 @@ import java.sql.Timestamp;
 public class Report {
     @Id
     private long id;
-
     private Timestamp created;
+    @Enumerated(EnumType.STRING)
+    private Period period;
     private long total;
-
+    @ElementCollection
+    @CollectionTable
+    private Set<ReportCategory> reportCategories = new HashSet<>();
 
 }
