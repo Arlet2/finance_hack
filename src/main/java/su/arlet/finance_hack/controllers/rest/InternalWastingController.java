@@ -64,8 +64,8 @@ public class InternalWastingController {
     @ApiResponse(responseCode = "401", description = "user not found")
     @ApiResponse(responseCode = "500", description = "Server error")
     public ResponseEntity<?> updateWastes(@RequestBody List<PaymentInfo> paymentInfoList, HttpServletRequest servletRequest) {
-
         String username = authService.getUsernameFromHttpRequest(servletRequest);
+
         User user = authService.getByUsername(username);
 
         if (paymentInfoList == null || paymentInfoList.isEmpty())
