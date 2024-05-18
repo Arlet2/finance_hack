@@ -2,6 +2,7 @@ package su.arlet.finance_hack.core;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,4 +25,8 @@ public class Goal {
     private long currentTotal;
     private String name;
     private String description;
+    private boolean isDone;
+    @ManyToOne
+    private User user;
+
 }
