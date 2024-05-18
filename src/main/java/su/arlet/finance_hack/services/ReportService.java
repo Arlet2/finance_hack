@@ -65,7 +65,9 @@ public class ReportService {
         return new Timestamp(calendar.getTimeInMillis());
     }
 
-    public Report createNewReport(long total, Set<ReportCategory> reportCategories, Period period) {
+    public void createNewReport(Period period) {
+
+
         Report report = new Report();
         report.setCreated(new Timestamp(System.currentTimeMillis()));
         report.setTotal(total);
@@ -73,6 +75,8 @@ public class ReportService {
         report.setPeriod(period);
 
         return reportRepo.save(report);
+
+        // TODO уведомлялка о новом репорте
     }
 
     public Optional<ReportComparison> compareReports(int firstMonth, int firstYear, int secondMonth, int secondYear, Period period) {
