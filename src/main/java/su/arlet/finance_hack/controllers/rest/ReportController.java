@@ -69,13 +69,9 @@ public class ReportController {
     @GetMapping("/compare")
     @Operation(summary = "Compare reports")
     public ResponseEntity<?> compareReports(
-            @RequestParam int firstMonth,
-            @RequestParam int firstYear,
-            @RequestParam int secondMonth,
-            @RequestParam int secondYear,
-            @RequestParam String periodType) {
-        Period period = Period.valueOf(periodType.toUpperCase());
-        Optional<ReportComparison> comparison = reportService.compareReports(firstMonth, firstYear, secondMonth, secondYear, period);
+            @RequestBody ReportService.DateAndPeriod dap) {
+        dap.validate();
+        Optional<ReportComparison> comparison = reportService.compareReports(dap);
 
         if (comparison.isPresent()) {
             ReportService.ComparisonResult comparisonResult = reportService.displayDifferences(comparison.get());

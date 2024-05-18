@@ -1,22 +1,30 @@
 package su.arlet.finance_hack.services;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import su.arlet.finance_hack.controllers.rest.ValidationException;
+import su.arlet.finance_hack.core.*;
 import su.arlet.finance_hack.core.Report;
 import su.arlet.finance_hack.core.ReportCategory;
 import su.arlet.finance_hack.core.ReportComparison;
 import su.arlet.finance_hack.core.enums.Period;
 import su.arlet.finance_hack.exceptions.RepoAlreadyDeleteException;
 import su.arlet.finance_hack.exceptions.WasteAlreadyDeletedException;
+import su.arlet.finance_hack.repos.PaymentInfoRepo;
 import su.arlet.finance_hack.repos.ReportRepo;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ReportService {
     private final ReportRepo reportRepo;
+    private final PaymentInfoRepo paymentInfoRepo;
+    private final AuthService authService;
 
     public List<Report> getReports(String periodType) {
         if (periodType==null) {
@@ -33,16 +41,6 @@ public class ReportService {
         Report report = reportRepo.findById(id).orElseThrow(RepoAlreadyDeleteException::new);
         reportRepo.deleteById(id);
     }
-
-//    public List<Report> getByDate(Timestamp date) {
-//        return  reportRepo.findByCreated(date);
-//    }
-
-//    public List<Report> getReportsByPeriod(String periodType) {
-//        Timestamp startDate = getStartDateByPeriod(periodType);
-//        Timestamp endDate = new Timestamp(System.currentTimeMillis());
-//        return reportRepo.findAllByCreatedBetween(startDate, endDate);
-//    }
 
     private Timestamp getStartDateByPeriod(String periodType) {
         Calendar calendar = Calendar.getInstance();
@@ -67,21 +65,36 @@ public class ReportService {
 
     public void createNewReport(Period period) {
 
+        List<User> users = authService.getAllUsers();
+        for (User user : users) {
+            List<PaymentInfo> payments = paymentInfoRepo.findByUser(user);
 
-//        Report report = new Report();
-//        report.setCreated(new Timestamp(System.currentTimeMillis()));
-//        report.setTotal(total);
-//        report.setReportCategories(reportCategories);
-//        report.setPeriod(period);
-//
-//        return reportRepo.save(report);
+            long totalSum = payments.stream().mapToLong(PaymentInfo::getSum).sum();
+            Map<String, Long> categorySums = payments.stream()
+                    .collect(Collectors.groupingBy(
+                            payment -> payment.getItemCategory().getName(),
+                            Collectors.summingLong(PaymentInfo::getSum)
+                    ));
+
+            Set<ReportCategory> reportCategories = categorySums.entrySet().stream()
+                    .map(entry -> new ReportCategory(entry.getKey(), entry.getValue()))
+                    .collect(Collectors.toSet());
+
+            Report report = new Report();
+            report.setCreated(new Timestamp(System.currentTimeMillis()));
+            report.setPeriod(period);
+            report.setTotal(totalSum);
+            report.setReportCategories(reportCategories);
+            report.setUser(user);
+            reportRepo.save(report);
+        }
 
         // TODO уведомлялка о новом репорте
     }
 
-    public Optional<ReportComparison> compareReports(int firstMonth, int firstYear, int secondMonth, int secondYear, Period period) {
-        List<Report> firstReports = reportRepo.findReportsByMonthAndYear(firstMonth, firstYear, period);
-        List<Report> secondReports = reportRepo.findReportsByMonthAndYear(secondMonth, secondYear, period);
+    public Optional<ReportComparison> compareReports(DateAndPeriod dap) {
+        List<Report> firstReports = reportRepo.findReportsByMonthAndYear(dap.getFirstMonth(), dap.getFirstYear(), dap.getPeriod());
+        List<Report> secondReports = reportRepo.findReportsByMonthAndYear(dap.getSecondMonth(), dap.getSecondYear(), dap.getPeriod());
 
         if (!firstReports.isEmpty() && !secondReports.isEmpty()) {
             ReportComparison comparison = new ReportComparison(firstReports.get(0), secondReports.get(0));
@@ -129,7 +142,7 @@ public class ReportService {
     public Report getByIdBeforeDeleting(Long id) {
         return reportRepo.findById(id).orElseThrow(WasteAlreadyDeletedException::new);
     }
-    public class ComparisonResult {
+    public static class ComparisonResult {
         private Map<String, Long> categoryDifferences;
         private long totalDifference;
 
@@ -144,6 +157,33 @@ public class ReportService {
 
         public long getTotalDifference() {
             return totalDifference;
+        }
+    }
+
+
+    @Getter
+    public static class DateAndPeriod {
+        private int firstMonth;
+        private int firstYear;
+        private int secondMonth;
+        private int secondYear;
+        private Period period;
+        public DateAndPeriod(int firstMonth, int firstYear, int secondMonth, int secondYear, String periodType) {
+            this.firstMonth = firstMonth;
+            this.firstYear = firstYear;
+            this.secondMonth = secondMonth;
+            this.secondYear = secondYear;
+            this.period = Period.valueOf(periodType);
+        }
+
+        public void validate() {
+            int currentYear = LocalDate.now().getYear();
+            int currentMonth = LocalDate.now().getMonthValue();
+            if (firstMonth != currentMonth) throw new ValidationException("Month can't be not positive");
+            if (firstYear != currentYear) throw new ValidationException("Year can't be not positive");
+            if (secondMonth != currentMonth) throw new ValidationException("Month can't be not positive");
+            if (secondYear != currentYear) throw new ValidationException("Month can't be not positive");
+            if (Period.isEnumContains(period)) throw new ValidationException("period can't be not in enum");
         }
     }
 }
