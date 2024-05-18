@@ -24,7 +24,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Setter
 @Getter
-public class AuthService{
+public class AuthService {
     private final UserRepo userRepo;
     private final Algorithm algorithm = Algorithm.HMAC256("Shulga");
     private final JWTVerifier verifier = JWT.require(algorithm)
@@ -110,8 +110,8 @@ public class AuthService{
         User user = getUserByUsername(username);
 
         String hashPassword = user.getHashPassword();
-        if (updateUserEntity.hashPassword != null) {
-            hashPassword = updateUserEntity.hashPassword;
+        if (updateUserEntity.password != null) {
+            hashPassword = SHA1Hasher.toSHA1(updateUserEntity.password);
         }
 
         LocalDate birthday = user.getBirthday();
@@ -171,7 +171,7 @@ public class AuthService{
             if (this.password == null || this.password.isEmpty()) {
                 throw new ValidationErrorException();
             }
-            if(this.birthday == null) {
+            if (this.birthday == null) {
                 throw new ValidationErrorException();
             }
             if (this.email == null || this.email.isEmpty()) {
@@ -187,7 +187,7 @@ public class AuthService{
     @NoArgsConstructor
     public static class UpdateUserEntity {
 
-        private String hashPassword;
+        private String password;
 
         private LocalDate birthday;
 
