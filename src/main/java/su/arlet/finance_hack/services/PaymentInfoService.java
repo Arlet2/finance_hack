@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import su.arlet.finance_hack.controllers.rest.ValidationException;
 import su.arlet.finance_hack.core.*;
 import su.arlet.finance_hack.core.enums.PaymentType;
-import su.arlet.finance_hack.exceptions.InvalidPaymentInfoException;
 import su.arlet.finance_hack.exceptions.WasteAlreadyDeletedException;
 import su.arlet.finance_hack.repos.ItemCategoryRepo;
 import su.arlet.finance_hack.repos.PaymentInfoRepo;
@@ -22,14 +21,18 @@ public class PaymentInfoService {
     private final PaymentInfoRepo paymentInfoRepo;
     private final ItemCategoryRepo itemCategoryRepo;
     private final GoalService goalService;
+    private final NotificationSender sender;
+    private final UserService userService;
 
     private final Counter wasteCounter;
 
     @Autowired
-    public PaymentInfoService(PaymentInfoRepo paymentInfoRepo, ItemCategoryRepo itemCategoryRepo, GoalService goalService, MeterRegistry meterRegistry) {
+    public PaymentInfoService(PaymentInfoRepo paymentInfoRepo, ItemCategoryRepo itemCategoryRepo, GoalService goalService, NotificationSender sender, UserService userService, AuthService authService, UserService userService1, MeterRegistry meterRegistry) {
         this.paymentInfoRepo = paymentInfoRepo;
         this.itemCategoryRepo = itemCategoryRepo;
         this.goalService = goalService;
+        this.sender = sender;
+        this.userService = userService1;
         wasteCounter = meterRegistry.counter("waste_counter");
     }
 
@@ -52,7 +55,8 @@ public class PaymentInfoService {
         PaymentInfo save = paymentInfoRepo.save(info);
 
         if (save.getPaymentType() == PaymentType.SAVED) {
-            // TODO : добавить работу с лимитами трат
+            User user = changeUserCurrentWasting(save.getUser(), save.getSum());
+//            userService.
         }
 
         if (save.getPaymentType() == PaymentType.FOR_GOAL) {
@@ -129,6 +133,21 @@ public class PaymentInfoService {
             prioritySum -= goal.getPriority();
         }
         return goals;
+    }
+
+    private User changeUserCurrentWasting(User user, long wastingSum) {
+        user.setCurrentWastings(user.getCurrentWastings() + wastingSum);
+        if (user.getLimit() < user.getCurrentWastings())
+            sender.sendNotification(new Notification(
+                    "You have exceeded your limit",
+                    NotificationType.INTERNAL,
+                    null));
+        else if ((double) user.getCurrentWastings() / user.getLimit() >= 0.8)
+            sender.sendNotification(new Notification(
+                    "You're approaching your spending limits",
+                    NotificationType.INTERNAL,
+                    null));
+        return user;
     }
 
 }
