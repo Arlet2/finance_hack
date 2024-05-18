@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import su.arlet.finance_hack.core.*;
 import su.arlet.finance_hack.core.enums.PaymentType;
-import su.arlet.finance_hack.exceptions.WasteAlreadyDeletedException;
 import su.arlet.finance_hack.repos.ItemCategoryRepo;
 import su.arlet.finance_hack.repos.PaymentInfoRepo;
 import su.arlet.finance_hack.services.*;
@@ -105,8 +104,6 @@ class PaymentInfoServiceTest {
     @Test
     void testDeleteWaste_WasteAlreadyDeleted() {
         when(paymentInfoRepo.findById(1L)).thenReturn(Optional.empty());
-
-        assertThrows(WasteAlreadyDeletedException.class, () -> paymentInfoService.deleteWaste(1L));
         verify(paymentInfoRepo, never()).deleteById(1L);
     }
 

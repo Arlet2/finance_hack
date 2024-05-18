@@ -35,7 +35,6 @@ public class GoalServiceTest {
     void setUp() {
         testUser = new User();
         testUser.setUsername("testuser");
-
         testGoal = new Goal();
         testGoal.setId(1L);
         testGoal.setSum(1000L);
@@ -89,7 +88,6 @@ public class GoalServiceTest {
     @Test
     void testDeleteGoal() {
         when(goalRepo.findById(1L)).thenReturn(Optional.of(testGoal));
-
         goalService.deleteGoal(1L, testUser);
 
         verify(goalRepo).deleteById(1L);
@@ -98,7 +96,6 @@ public class GoalServiceTest {
     @Test
     void testDeleteGoalNotFound() {
         when(goalRepo.findById(1L)).thenReturn(Optional.empty());
-
         assertThrows(EntityNotFoundException.class, () -> goalService.deleteGoal(1L, testUser));
     }
 

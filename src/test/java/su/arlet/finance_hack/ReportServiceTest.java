@@ -6,7 +6,6 @@ import org.mockito.*;
 import su.arlet.finance_hack.core.*;
 import su.arlet.finance_hack.core.enums.Period;
 import su.arlet.finance_hack.exceptions.EntityWasAlreadyDeleteException;
-import su.arlet.finance_hack.exceptions.WasteAlreadyDeletedException;
 import su.arlet.finance_hack.repos.PaymentInfoRepo;
 import su.arlet.finance_hack.repos.ReportRepo;
 import su.arlet.finance_hack.services.AuthService;
