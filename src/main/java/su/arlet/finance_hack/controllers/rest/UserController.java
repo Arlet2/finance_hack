@@ -123,4 +123,30 @@ public class UserController {
         authService.delete(username);
         return ResponseEntity.ok(null);
     }
+
+    @GetMapping("/limit")
+    @Operation(summary = "Get limit by username")
+    @ApiResponse(responseCode = "200", description = "Success - found User", content = {
+            @Content(schema = @Schema(implementation = long.class))
+    }
+    )
+    @ApiResponse(responseCode = "404", description = "Not found - User not found")
+    @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
+    public ResponseEntity<?> getLimitByUsername(HttpServletRequest httpServletRequest) {
+        var username = authService.getUsernameFromHttpRequest(httpServletRequest);
+        return new ResponseEntity<>(authService.getByUsername(username).getLimit(), HttpStatus.OK);
+    }
+
+    @GetMapping("/wastings")
+    @Operation(summary = "Get current wastings by username")
+    @ApiResponse(responseCode = "200", description = "Success - found User", content = {
+            @Content(schema = @Schema(implementation = long.class))
+    }
+    )
+    @ApiResponse(responseCode = "404", description = "Not found - User not found")
+    @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
+    public ResponseEntity<?> getCurrentWastingsByUsername(HttpServletRequest httpServletRequest) {
+        var username = authService.getUsernameFromHttpRequest(httpServletRequest);
+        return new ResponseEntity<>(authService.getByUsername(username).getCurrentWastings(), HttpStatus.OK);
+    }
 }
