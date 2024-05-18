@@ -7,6 +7,7 @@ import su.arlet.finance_hack.core.ReportCategory;
 import su.arlet.finance_hack.core.ReportComparison;
 import su.arlet.finance_hack.core.enums.Period;
 import su.arlet.finance_hack.exceptions.RepoAlreadyDeleteException;
+import su.arlet.finance_hack.exceptions.WasteAlreadyDeletedException;
 import su.arlet.finance_hack.repos.ReportRepo;
 
 import java.sql.Timestamp;
@@ -17,20 +18,31 @@ import java.util.*;
 public class ReportService {
     private final ReportRepo reportRepo;
 
-    public Report getByDate(Timestamp date) {
-        return  reportRepo.findByCreated(date);
+    public List<Report> getReports(String periodType) {
+        if (periodType==null) {
+            Timestamp date = new Timestamp(System.currentTimeMillis());
+            return  reportRepo.findByCreated(date);
+        }
+        Timestamp startDate = getStartDateByPeriod(periodType);
+        Timestamp endDate = new Timestamp(System.currentTimeMillis());
+        return reportRepo.findAllByCreatedBetween(startDate, endDate);
     }
+
 
     public void deleteReport (Long id) {
         Report report = reportRepo.findById(id).orElseThrow(RepoAlreadyDeleteException::new);
         reportRepo.deleteById(id);
     }
 
-    public List<Report> getReportsByPeriod(String periodType) {
-        Timestamp startDate = getStartDateByPeriod(periodType);
-        Timestamp endDate = new Timestamp(System.currentTimeMillis());
-        return reportRepo.findAllByCreatedBetween(startDate, endDate);
-    }
+//    public List<Report> getByDate(Timestamp date) {
+//        return  reportRepo.findByCreated(date);
+//    }
+
+//    public List<Report> getReportsByPeriod(String periodType) {
+//        Timestamp startDate = getStartDateByPeriod(periodType);
+//        Timestamp endDate = new Timestamp(System.currentTimeMillis());
+//        return reportRepo.findAllByCreatedBetween(startDate, endDate);
+//    }
 
     private Timestamp getStartDateByPeriod(String periodType) {
         Calendar calendar = Calendar.getInstance();
@@ -108,6 +120,10 @@ public class ReportService {
             categorySums.put(category.getCategory(), category.getSum());
         }
         return categorySums;
+    }
+
+    public Report getByIdBeforeDeleting(Long id) {
+        return reportRepo.findById(id).orElseThrow(WasteAlreadyDeletedException::new);
     }
     public class ComparisonResult {
         private Map<String, Long> categoryDifferences;
