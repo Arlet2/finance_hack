@@ -69,17 +69,16 @@ public class ReportService {
 
         if (!firstReports.isEmpty() && !secondReports.isEmpty()) {
             ReportComparison comparison = new ReportComparison(firstReports.get(0), secondReports.get(0));
-            displayDifferences(comparison);
             return Optional.of(comparison);
         }
         return Optional.empty();
     }
 
-    private void displayDifferences(ReportComparison comparison) {
+    public ComparisonResult displayDifferences(ReportComparison comparison) {
         Map<String, Long> categoryDifferences = calculateCategoryDifferences(comparison.getFirstReport(), comparison.getSecondReport());
         long totalDifference = calculateTotalDifference(comparison.getFirstReport(), comparison.getSecondReport());
 
-        new ComparisonResult(categoryDifferences, totalDifference);
+        return new ComparisonResult(categoryDifferences, totalDifference);
     }
 
     private Map<String, Long> calculateCategoryDifferences(Report firstReport, Report secondReport) {
@@ -110,22 +109,21 @@ public class ReportService {
         }
         return categorySums;
     }
+    public class ComparisonResult {
+        private Map<String, Long> categoryDifferences;
+        private long totalDifference;
 
-}
-class ComparisonResult {
-    private Map<String, Long> categoryDifferences;
-    private long totalDifference;
+        public ComparisonResult(Map<String, Long> categoryDifferences, long totalDifference) {
+            this.categoryDifferences = categoryDifferences;
+            this.totalDifference = totalDifference;
+        }
 
-    public ComparisonResult(Map<String, Long> categoryDifferences, long totalDifference) {
-        this.categoryDifferences = categoryDifferences;
-        this.totalDifference = totalDifference;
-    }
+        public Map<String, Long> getCategoryDifferences() {
+            return categoryDifferences;
+        }
 
-    public Map<String, Long> getCategoryDifferences() {
-        return categoryDifferences;
-    }
-
-    public long getTotalDifference() {
-        return totalDifference;
+        public long getTotalDifference() {
+            return totalDifference;
+        }
     }
 }
