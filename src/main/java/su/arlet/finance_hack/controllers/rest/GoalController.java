@@ -93,9 +93,14 @@ public class GoalController {
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     public ResponseEntity<Goal> updateGoal(
             @PathVariable Long id,
-            @RequestBody GoalService.CreateGoalEntity.UpdateGoalEntity updateGoalEntity
+            @RequestBody GoalService.CreateGoalEntity.UpdateGoalEntity updateGoalEntity,
+            HttpServletRequest servletRequest
     ) {
         Goal goal = goalService.getGoalById(id);
+        String username = authService.getUsernameByHttpRequest(servletRequest);
+        if (!goal.getUser().getUsername().equals(username)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         updateGoalEntity.validate();
         if (updateGoalEntity.getSum() != null) {
             goal.setSum(updateGoalEntity.getSum());
