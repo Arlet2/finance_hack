@@ -62,10 +62,9 @@ public class UserController {
     @ApiResponse(responseCode = "404", description = "Not found - user not found", content = {})
     @ApiResponse(responseCode = "500", description = "Server error", content = {})
     public ResponseEntity<?> login(
-            @RequestBody String username, String password
-    ) {
-
-        String jwtToken = authService.loginUser(username, password);
+            @RequestBody AuthService.LoginUser loginUser
+            ) {
+        String jwtToken = authService.loginUser(loginUser.getUsername(), loginUser.getPassword());
         return ResponseEntity.status(HttpStatus.CREATED).body(jwtToken);
     }
 
