@@ -1,5 +1,6 @@
 package su.arlet.finance_hack.core;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,6 +20,7 @@ public class User {
     @Column(name = "username", unique = true, nullable = false)
     private String username;
 
+    @JsonIgnore
     @Column(name = "hashPassword", nullable = false)
     private String hashPassword;
 
@@ -35,5 +37,5 @@ public class User {
     private Report[] reports;
 
     @Column(name = "user_limit", nullable = false)
-    private long limit;
+    private Long limit;
 }

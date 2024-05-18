@@ -8,22 +8,23 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import su.arlet.finance_hack.exceptions.IncorrectUsernameException;
 import su.arlet.finance_hack.exceptions.UserNotFoundException;
 import su.arlet.finance_hack.exceptions.WasteAlreadyDeletedException;
+import su.arlet.finance_hack.exceptions.UserAlreadyExistsException;
 
 @RestControllerAdvice
 class ErrorHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public void handleAllException(Exception e, HttpServletRequest request) {
-        System.out.println("Error in "+request.getMethod()+" "+request.getRequestURL()+": "+e.getMessage());
+        System.out.println("Error in " + request.getMethod() + " " + request.getRequestURL() + ": " + e.getMessage());
     }
 
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handleValidationException(ValidationException e) {
-        return "Bad body: "+e.getMessage();
+        return "Bad body: " + e.getMessage();
     }
 
-//    @ExceptionHandler(EntityNotFoundException::class)
+    //    @ExceptionHandler(EntityNotFoundException::class)
 //    @ResponseStatus(HttpStatus.NOT_FOUND)
 //    fun handleEntityNotFoundException(e: EntityNotFoundException): String {
 //        return "Not found"
@@ -41,11 +42,11 @@ class ErrorHandler {
 //        return "unsupported status change"
 //    }
 //
-//    @ExceptionHandler(UserAlreadyExistsException::class)
-//    @ResponseStatus(HttpStatus.CONFLICT)
-//    fun handleUserAlreadyExistsException(e: UserAlreadyExistsException): String {
-//        return "this username has been already taken"
-//    }
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String handleUserAlreadyExistsException(UserAlreadyExistsException e) {
+        return "this username has been already taken";
+    }
 //
 //    @ExceptionHandler(UnauthorizedError::class)
 //    @ResponseStatus(HttpStatus.UNAUTHORIZED)
