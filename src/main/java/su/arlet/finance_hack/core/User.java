@@ -30,6 +30,9 @@ public class User {
     @Column(name = "email", nullable = false)
     private String email;
 
+    @Column(name = "current_wastings", nullable = false)
+    private long currentWastings;
+
     @ManyToOne
     private Goal[] goals;
 
@@ -38,4 +41,5 @@ public class User {
 
     @Column(name = "user_limit", nullable = false)
     private long limit;
+
 }

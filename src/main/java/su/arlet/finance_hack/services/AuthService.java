@@ -49,7 +49,8 @@ public class AuthService {
                 createUserEntity.username,
                 hashPassword,
                 createUserEntity.birthday,
-                createUserEntity.email, null, null, 0
+                createUserEntity.email,
+                0, null, null, 0
         );
         if (userRepo.existsByUsername(user.getUsername())) {
             throw new UserAlreadyExistsException();
@@ -140,6 +141,10 @@ public class AuthService {
         if (updateUserEntity.email != null) {
             email = updateUserEntity.email;
         }
+        long wastings = user.getCurrentWastings();
+        if (updateUserEntity.currentWastings != null) {
+            wastings = updateUserEntity.currentWastings;
+        }
 
         Goal[] goals = user.getGoals();
         if (updateUserEntity.goals != null) {
@@ -160,6 +165,7 @@ public class AuthService {
                 hashPassword,
                 birthday,
                 email,
+                wastings,
                 goals,
                 reports,
                 limit
@@ -210,6 +216,8 @@ public class AuthService {
 
         private String email;
 
+        private Long currentWastings;
+
         private Goal[] goals;
 
         private Report[] reports;
@@ -218,6 +226,9 @@ public class AuthService {
 
         public void validate() {
             if (this.email != null && this.email.isEmpty()) {
+                throw new ValidationErrorException();
+            }
+            if (this.currentWastings != null && this.currentWastings < 0) {
                 throw new ValidationErrorException();
             }
             if (this.limit != null && this.limit < 0) {
