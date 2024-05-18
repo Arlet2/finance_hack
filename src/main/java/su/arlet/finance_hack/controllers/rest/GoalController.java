@@ -74,6 +74,7 @@ public class GoalController {
         goal.setName(createGoalEntity.getName());
         goal.setSum(createGoalEntity.getSum());
         goal.setDeadline(createGoalEntity.getDeadline());
+        goal.setPriority(createGoalEntity.getPriority());
         goal.setUser(user);
 
         Goal createdGoal = goalService.createGoal(goal);
@@ -104,6 +105,9 @@ public class GoalController {
         if (updateGoalEntity.getDeadline() != null) {
             goal.setDeadline(updateGoalEntity.getDeadline());
         }
+        if (updateGoalEntity.getPriority() != null) {
+            goal.setPriority(updateGoalEntity.getPriority());
+        }
         Goal updatedGoal = goalService.updateGoal(goal);
         return ResponseEntity.ok(updatedGoal);
     }
@@ -112,7 +116,6 @@ public class GoalController {
     @Operation(summary = "Delete goal")
     @ApiResponse(responseCode = "200", description = "Success - deleted goal", content = {@Content()})
     @ApiResponse(responseCode = "204", description = "Goal already removed", content = {@Content()})
-    // TODO : посмотри как сделана у Зотова Артема обработка ошибок ExceptionHandler
     @ApiResponse(responseCode = "403", description = "Forbidden - user does not own the goal")
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     public ResponseEntity<?> deleteGoal(@PathVariable Long id, HttpServletRequest servletRequest) {

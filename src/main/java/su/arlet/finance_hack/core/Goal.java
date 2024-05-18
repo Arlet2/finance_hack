@@ -23,6 +23,7 @@ public class Goal {
     private String name;
     private String description;
     private boolean isDone;
+    private long priority;
     @ManyToOne
     private User user;
 

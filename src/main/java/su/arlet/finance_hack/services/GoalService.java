@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import su.arlet.finance_hack.controllers.rest.ValidationException;
 import su.arlet.finance_hack.core.Goal;
+import su.arlet.finance_hack.core.User;
 import su.arlet.finance_hack.exceptions.EntityNotFoundException;
 import su.arlet.finance_hack.exceptions.EntityWasAlreadyRemovedException;
 import su.arlet.finance_hack.repos.GoalRepo;
@@ -50,6 +51,10 @@ public class GoalService {
         return goalRepo.findByIsDone(isDone);
     }
 
+    public List<Goal> getGoalsByUser(User user) {
+        return goalRepo.findByUser(user);
+    }
+
     public List<Goal> getGoalsByDeadlineBefore(LocalDate deadline) {
         return goalRepo.findByDeadlineBefore(deadline);
     }
@@ -88,6 +93,7 @@ public class GoalService {
         private LocalDate deadline;
         private String name;
         private String description;
+        private Long priority;
 
         public void validate() {
 
@@ -99,6 +105,9 @@ public class GoalService {
             }
             if (this.name == null || this.name.isEmpty()) {
                 throw new ValidationException("name undefined");
+            }
+            if (this.priority == null || (this.priority <= 0 || this.priority > 10)) {
+                throw new ValidationException("priority undefined");
             }
 
 
@@ -112,6 +121,7 @@ public class GoalService {
             private LocalDate deadline;
             private String name;
             private String description;
+            private Long priority;
 
             public void validate() {
                 if (this.deadline != null
@@ -121,11 +131,14 @@ public class GoalService {
                 if (this.sum != null && this.sum < 0) {
                     throw new ValidationException("sum undefined");
                 }
-                if (!(this.name != null && !this.name.isEmpty())) {
+                if (this.name != null && this.name.isEmpty()) {
                     throw new ValidationException("name undefined");
                 }
-                if (!(this.description != null && !this.description.isEmpty())) {
+                if (this.description != null && this.description.isEmpty()) {
                     throw new ValidationException("description undefined");
+                }
+                if (this.priority != null && (this.priority <= 0 || this.priority > 10)) {
+                    throw new ValidationException("priority undefined");
                 }
 
             }
