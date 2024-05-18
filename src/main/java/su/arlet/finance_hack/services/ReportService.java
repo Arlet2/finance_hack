@@ -36,16 +36,6 @@ public class ReportService {
         reportRepo.deleteById(id);
     }
 
-//    public List<Report> getByDate(Timestamp date) {
-//        return  reportRepo.findByCreated(date);
-//    }
-
-//    public List<Report> getReportsByPeriod(String periodType) {
-//        Timestamp startDate = getStartDateByPeriod(periodType);
-//        Timestamp endDate = new Timestamp(System.currentTimeMillis());
-//        return reportRepo.findAllByCreatedBetween(startDate, endDate);
-//    }
-
     private Timestamp getStartDateByPeriod(String periodType) {
         Calendar calendar = Calendar.getInstance();
         switch (periodType.toUpperCase()) {
@@ -91,16 +81,6 @@ public class ReportService {
         }
         return Optional.empty();
     }
-//    public Optional<ReportComparison> compareReports(int firstMonth, int firstYear, int secondMonth, int secondYear, Period period) {
-//        List<Report> firstReports = reportRepo.findReportsByMonthAndYear(firstMonth, firstYear, period);
-//        List<Report> secondReports = reportRepo.findReportsByMonthAndYear(secondMonth, secondYear, period);
-//
-//        if (!firstReports.isEmpty() && !secondReports.isEmpty()) {
-//            ReportComparison comparison = new ReportComparison(firstReports.get(0), secondReports.get(0));
-//            return Optional.of(comparison);
-//        }
-//        return Optional.empty();
-//    }
 
     public ComparisonResult displayDifferences(ReportComparison comparison) {
         Map<String, Long> categoryDifferences = calculateCategoryDifferences(comparison.getFirstReport(), comparison.getSecondReport());
@@ -141,7 +121,7 @@ public class ReportService {
     public Report getByIdBeforeDeleting(Long id) {
         return reportRepo.findById(id).orElseThrow(WasteAlreadyDeletedException::new);
     }
-    public class ComparisonResult {
+    public static class ComparisonResult {
         private Map<String, Long> categoryDifferences;
         private long totalDifference;
 
