@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import su.arlet.finance_hack.controllers.rest.ValidationException;
 import su.arlet.finance_hack.core.*;
 import su.arlet.finance_hack.core.enums.PaymentType;
-import su.arlet.finance_hack.exceptions.WasteAlreadyDeletedException;
+import su.arlet.finance_hack.exceptions.EntityWasAlreadyDeleteException;
 import su.arlet.finance_hack.repos.ItemCategoryRepo;
 import su.arlet.finance_hack.repos.PaymentInfoRepo;
 
@@ -81,7 +81,7 @@ public class PaymentInfoService {
 
 
     public void deleteWaste(Long paymentId) {
-        PaymentInfo info = paymentInfoRepo.findById(paymentId).orElseThrow(WasteAlreadyDeletedException::new);
+        PaymentInfo info = paymentInfoRepo.findById(paymentId).orElseThrow(EntityWasAlreadyDeleteException::new);
 
         if (info.getPaymentType() == PaymentType.SAVED) {
             // TODO : добавить работу с лимитами трат
@@ -96,7 +96,7 @@ public class PaymentInfoService {
     }
 
     public PaymentInfo getByIdBeforeDeleting(Long id) {
-        return paymentInfoRepo.findById(id).orElseThrow(WasteAlreadyDeletedException::new);
+        return paymentInfoRepo.findById(id).orElseThrow(EntityWasAlreadyDeleteException::new);
     }
 
     public List<PaymentInfo> updateWastes(List<PaymentInfo> paymentInfoList) {

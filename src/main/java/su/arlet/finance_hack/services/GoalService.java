@@ -1,7 +1,9 @@
 package su.arlet.finance_hack.services;
 
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -89,7 +91,9 @@ public class GoalService {
 
     @Getter
     @Setter
-    public class CreateGoalEntity {
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CreateGoalEntity {
 
         private Long sum;
         private LocalDate deadline;
@@ -117,6 +121,8 @@ public class GoalService {
 
         @Getter
         @Setter
+        @NoArgsConstructor
+        @AllArgsConstructor
         public static class UpdateGoalEntity {
 
             private Long sum;

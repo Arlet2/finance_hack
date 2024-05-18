@@ -65,12 +65,6 @@ class ErrorHandler {
         return "login is incorrectly set / not set at all";
     }
 
-    @ExceptionHandler(WasteAlreadyDeletedException.class)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public String handleWasteAlreadyDeletedException(WasteAlreadyDeletedException e) {
-        contentErrorCounter.increment();
-        return "object has already been deleted";
-    }
     @ExceptionHandler(WrongPasswordException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public String handleWrongPasswordException(WrongPasswordException e) {

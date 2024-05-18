@@ -7,7 +7,6 @@ import su.arlet.finance_hack.controllers.rest.ValidationException;
 import su.arlet.finance_hack.core.*;
 import su.arlet.finance_hack.core.enums.Period;
 import su.arlet.finance_hack.exceptions.EntityWasAlreadyDeleteException;
-import su.arlet.finance_hack.exceptions.WasteAlreadyDeletedException;
 import su.arlet.finance_hack.repos.PaymentInfoRepo;
 import su.arlet.finance_hack.repos.ReportRepo;
 
@@ -138,7 +137,7 @@ public class ReportService {
     }
 
     public Report getByIdBeforeDeleting(Long id) {
-        return reportRepo.findById(id).orElseThrow(WasteAlreadyDeletedException::new);
+        return reportRepo.findById(id).orElseThrow(EntityWasAlreadyDeleteException::new);
     }
 
     public static class ComparisonResult {
