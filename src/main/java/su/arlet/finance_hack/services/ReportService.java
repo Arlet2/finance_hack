@@ -1,7 +1,9 @@
 package su.arlet.finance_hack.services;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import su.arlet.finance_hack.controllers.rest.ValidationException;
 import su.arlet.finance_hack.core.Report;
 import su.arlet.finance_hack.core.ReportCategory;
 import su.arlet.finance_hack.core.ReportComparison;
@@ -79,9 +81,9 @@ public class ReportService {
         // TODO уведомлялка о новом репорте
     }
 
-    public Optional<ReportComparison> compareReports(int firstMonth, int firstYear, int secondMonth, int secondYear, Period period) {
-        List<Report> firstReports = reportRepo.findReportsByMonthAndYear(firstMonth, firstYear, period);
-        List<Report> secondReports = reportRepo.findReportsByMonthAndYear(secondMonth, secondYear, period);
+    public Optional<ReportComparison> compareReports(DateAndPeriod dap) {
+        List<Report> firstReports = reportRepo.findReportsByMonthAndYear(dap.getFirstMonth(), dap.getFirstYear(), dap.getPeriod());
+        List<Report> secondReports = reportRepo.findReportsByMonthAndYear(dap.getSecondMonth(), dap.getSecondYear(), dap.getPeriod());
 
         if (!firstReports.isEmpty() && !secondReports.isEmpty()) {
             ReportComparison comparison = new ReportComparison(firstReports.get(0), secondReports.get(0));
@@ -89,6 +91,16 @@ public class ReportService {
         }
         return Optional.empty();
     }
+//    public Optional<ReportComparison> compareReports(int firstMonth, int firstYear, int secondMonth, int secondYear, Period period) {
+//        List<Report> firstReports = reportRepo.findReportsByMonthAndYear(firstMonth, firstYear, period);
+//        List<Report> secondReports = reportRepo.findReportsByMonthAndYear(secondMonth, secondYear, period);
+//
+//        if (!firstReports.isEmpty() && !secondReports.isEmpty()) {
+//            ReportComparison comparison = new ReportComparison(firstReports.get(0), secondReports.get(0));
+//            return Optional.of(comparison);
+//        }
+//        return Optional.empty();
+//    }
 
     public ComparisonResult displayDifferences(ReportComparison comparison) {
         Map<String, Long> categoryDifferences = calculateCategoryDifferences(comparison.getFirstReport(), comparison.getSecondReport());
@@ -129,7 +141,7 @@ public class ReportService {
     public Report getByIdBeforeDeleting(Long id) {
         return reportRepo.findById(id).orElseThrow(WasteAlreadyDeletedException::new);
     }
-    public class ComparisonResult {
+    public static class ComparisonResult {
         private Map<String, Long> categoryDifferences;
         private long totalDifference;
 
@@ -144,6 +156,31 @@ public class ReportService {
 
         public long getTotalDifference() {
             return totalDifference;
+        }
+    }
+
+
+    @Getter
+    public static class DateAndPeriod {
+        private int firstMonth;
+        private int firstYear;
+        private int secondMonth;
+        private int secondYear;
+        private Period period;
+        public DateAndPeriod(int firstMonth, int firstYear, int secondMonth, int secondYear, String periodType) {
+            this.firstMonth = firstMonth;
+            this.firstYear = firstYear;
+            this.secondMonth = secondMonth;
+            this.secondYear = secondYear;
+            this.period = Period.valueOf(periodType);
+        }
+
+        public void validate() {
+            if (firstMonth < 0) throw new ValidationException("Month can't be not positive");
+            if (firstYear < 0) throw new ValidationException("Year can't be not positive");
+            if (secondMonth < 0) throw new ValidationException("Month can't be not positive");
+            if (secondYear < 0) throw new ValidationException("Month can't be not positive");
+            if (Period.isEnumContains(period)) throw new ValidationException("period can't be not in enum");
         }
     }
 }

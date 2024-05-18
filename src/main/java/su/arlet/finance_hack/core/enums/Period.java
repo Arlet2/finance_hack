@@ -1,11 +1,12 @@
 package su.arlet.finance_hack.core.enums;
 
+import java.util.Arrays;
+
 public enum Period {
     DAILY,
     WEEKLY,
     MONTHLY,
     YEARLY;
-
 
     public String getPeriodMessage() {
         return switch (this) {
@@ -16,4 +17,9 @@ public enum Period {
             default -> throw new IllegalArgumentException("Unexpected value: " + this);
         };
     }
+    public static boolean isEnumContains(Period per) {
+        return Arrays.asList(Period.values()).contains(per);
+    }
 }
+
+
