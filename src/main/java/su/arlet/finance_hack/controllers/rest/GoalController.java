@@ -123,7 +123,7 @@ public class GoalController {
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     public ResponseEntity<?> deleteGoal(@PathVariable Long id, HttpServletRequest servletRequest) {
         String username = authService.getUsernameFromHttpRequest(servletRequest);
-        User user = authService.getByUsername(username);
+        User user = userService.getByUsername(username);
         goalService.deleteGoal(id, user);
         return ResponseEntity.ok(null);
     }
