@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import su.arlet.finance_hack.exceptions.UserAlreadyExistsException;
+import su.arlet.finance_hack.exceptions.EntityNotFoundException;
+import su.arlet.finance_hack.exceptions.IncorrectUsernameException;
 import su.arlet.finance_hack.exceptions.UserNotFoundException;
 import su.arlet.finance_hack.exceptions.WasteAlreadyDeletedException;
 
@@ -44,6 +46,10 @@ class ErrorHandler {
         badRequestErrorCounter.inc();
         return "Bad body: " + e.getMessage();
     }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public void handleNotFoundException(EntityNotFoundException e) {}
 
     @ExceptionHandler(UserAlreadyExistsException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
