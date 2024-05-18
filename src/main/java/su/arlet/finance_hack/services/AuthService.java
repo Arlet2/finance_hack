@@ -49,7 +49,7 @@ public class AuthService {
 
     public String loginUser(String username, String password) {
         if (userRepo.existsByUsername(username)) {
-            User user = getUserByUsername(username);
+            User user = getByUsername(username);
             if (user.getHashPassword().equals(SHA1Hasher.toSHA1(password))) {
                 return generateJwtToken();
             } else {
@@ -107,7 +107,7 @@ public class AuthService {
         if (!userRepo.existsByUsername(username)) {
             throw new UserAlreadyExistsException();
         }
-        User user = getUserByUsername(username);
+        User user = getByUsername(username);
 
         String hashPassword = user.getHashPassword();
         if (updateUserEntity.password != null) {
@@ -208,10 +208,6 @@ public class AuthService {
             }
 
         }
-    }
-
-    public User getUserByUsername(String username) {
-        return userRepo.getUserByUsername(username);
     }
 
 }
