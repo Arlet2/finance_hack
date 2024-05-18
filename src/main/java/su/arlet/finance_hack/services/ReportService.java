@@ -8,6 +8,9 @@ import su.arlet.finance_hack.core.*;
 import su.arlet.finance_hack.core.Report;
 import su.arlet.finance_hack.core.ReportCategory;
 import su.arlet.finance_hack.core.ReportComparison;
+import su.arlet.finance_hack.core.Report;
+import su.arlet.finance_hack.core.ReportCategory;
+import su.arlet.finance_hack.core.ReportComparison;
 import su.arlet.finance_hack.core.enums.Period;
 import su.arlet.finance_hack.exceptions.RepoAlreadyDeleteException;
 import su.arlet.finance_hack.exceptions.WasteAlreadyDeletedException;
@@ -102,6 +105,16 @@ public class ReportService {
         }
         return Optional.empty();
     }
+//    public Optional<ReportComparison> compareReports(int firstMonth, int firstYear, int secondMonth, int secondYear, Period period) {
+//        List<Report> firstReports = reportRepo.findReportsByMonthAndYear(firstMonth, firstYear, period);
+//        List<Report> secondReports = reportRepo.findReportsByMonthAndYear(secondMonth, secondYear, period);
+//
+//        if (!firstReports.isEmpty() && !secondReports.isEmpty()) {
+//            ReportComparison comparison = new ReportComparison(firstReports.get(0), secondReports.get(0));
+//            return Optional.of(comparison);
+//        }
+//        return Optional.empty();
+//    }
 
     public ComparisonResult displayDifferences(ReportComparison comparison) {
         Map<String, Long> categoryDifferences = calculateCategoryDifferences(comparison.getFirstReport(), comparison.getSecondReport());
