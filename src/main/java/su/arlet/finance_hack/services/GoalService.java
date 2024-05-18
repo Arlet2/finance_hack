@@ -12,7 +12,7 @@ import su.arlet.finance_hack.exceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import su.arlet.finance_hack.core.Goal;
-import su.arlet.finance_hack.exceptions.ResourceNotFoundException;
+import su.arlet.finance_hack.exceptions.GoalNotFoundException;
 import su.arlet.finance_hack.repos.GoalRepo;
 
 import java.time.LocalDate;
@@ -20,7 +20,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 411a6c8 (check controller)
 
 @Service
 public class GoalService {
@@ -34,7 +37,11 @@ public class GoalService {
     }
 
     public Goal getGoalById(Long id) {
+<<<<<<< HEAD
         return goalRepo.findById(id).orElseThrow(EntityNotFoundException::new);
+=======
+        return goalRepo.findById(id).orElseThrow(GoalNotFoundException::new);
+>>>>>>> 411a6c8 (check controller)
     }
 
     public Goal createGoal(Goal goal) {
@@ -65,16 +72,25 @@ public class GoalService {
         return goalRepo.findByDeadlineBetween(startDate, endDate);
     }
     public Goal AddContributionToGoal (Long id, long contribution) {
-        Goal goal = goalRepo.findById(id).orElseThrow(ResourceNotFoundException::new);
+        Goal goal = goalRepo.findById(id).orElseThrow(GoalNotFoundException::new);
         goal.setCurrentTotal(goal.getCurrentTotal() + contribution);
         return goalRepo.save(goal);
     }
-    public Goal updateGoal(Goal goalDetails) {
-        Goal goal = goalRepo.findById(goalDetails.getId()).orElseThrow(ResourceNotFoundException::new);
+    public Goal updateGoal(Long id, Map<String, Object> updates) {
+        Goal goal = goalRepo.findById(id).orElseThrow(GoalNotFoundException::new);
+
+        if (updates.containsKey("sum")) {
+            goal.setSum(((Number) updates.get("sum")).longValue());
+        }
+        if (updates.containsKey("deadline")) {
+            goal.setDeadline(LocalDate.parse((String) updates.get("deadline")));
+        }
+
         return goalRepo.save(goal);
     }
+
     public double calculateMonthlyContribution(long goalId) {
-        Goal goal = goalRepo.findById(goalId).orElseThrow(ResourceNotFoundException::new);
+        Goal goal = goalRepo.findById(goalId).orElseThrow(GoalNotFoundException::new);
         long remainingSum = goal.getSum() - goal.getCurrentTotal();
         long monthsRemaining = ChronoUnit.MONTHS.between(LocalDate.now(), goal.getDeadline());
         return (double) remainingSum / monthsRemaining;
@@ -92,6 +108,7 @@ public class GoalService {
 
         return stats;
     }
+<<<<<<< HEAD
      */
 
     @Getter
@@ -138,4 +155,6 @@ public class GoalService {
         }
 
     }
+=======
+>>>>>>> 411a6c8 (check controller)
 }

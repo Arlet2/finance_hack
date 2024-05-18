@@ -30,7 +30,11 @@ public class Goal {
     private User user;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 }
 =======
 }
 >>>>>>> f0de473 (change 1)
+=======
+}
+>>>>>>> 411a6c8 (check controller)

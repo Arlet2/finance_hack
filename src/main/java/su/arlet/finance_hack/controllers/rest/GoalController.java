@@ -1,29 +1,39 @@
 package su.arlet.finance_hack.controllers.rest;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+<<<<<<< HEAD
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+=======
+>>>>>>> 411a6c8 (check controller)
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import su.arlet.finance_hack.core.Goal;
 import su.arlet.finance_hack.core.User;
+<<<<<<< HEAD
 import su.arlet.finance_hack.exceptions.EntityNotFoundException;
 import su.arlet.finance_hack.exceptions.WrongGoalDataException;
+=======
+import su.arlet.finance_hack.exceptions.GoalNotFoundException;
+>>>>>>> 411a6c8 (check controller)
 import su.arlet.finance_hack.services.AuthService;
 import su.arlet.finance_hack.services.GoalService;
 
 import java.time.LocalDate;
+<<<<<<< HEAD
 import java.util.List;
 import java.util.stream.Collectors;
+=======
+import java.util.Map;
+>>>>>>> 411a6c8 (check controller)
 
 @RestController
 @RequestMapping("${api.path}/goals")
@@ -32,6 +42,10 @@ public class GoalController {
 
     private final GoalService goalService;
     private final AuthService authService;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 411a6c8 (check controller)
 
     @Autowired
     public GoalController(GoalService goalService, AuthService authService) {
@@ -39,6 +53,33 @@ public class GoalController {
         this.authService = authService;
     }
 
+<<<<<<< HEAD
+=======
+    public class CreateGoalEntity {
+
+        private long sum;
+        private LocalDate deadline;
+        private String name;
+        private String description;
+
+    }
+
+    public class UpdateGoalEntity {
+
+        private long sum;
+        private LocalDate deadline;
+        private String name;
+
+        }
+
+    private class GoalInfoEntity {
+
+        private Goal goal;
+        private String username;
+
+    }
+
+>>>>>>> 411a6c8 (check controller)
 
     @GetMapping("/{id}")
     @Operation(summary = "Get goal by ID")
@@ -48,9 +89,15 @@ public class GoalController {
     )
     @ApiResponse(responseCode = "404", description = "Not found - goal not found")
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
-    public ResponseEntity<Goal> getGoalByID(@PathVariable Long id) {
-        Goal goal = goalService.getGoalById(id);
-        return new ResponseEntity<>(goal, HttpStatus.OK);
+    public ResponseEntity<Goal> getGoalByID(@PathVariable Long id) {public ResponseEntity<Goal> getGoalByID(@PathVariable Long id)
+        {
+            try {
+                Goal goal = goalService.getGoalById(id);
+                return ResponseEntity.ok(goal);
+            } catch (GoalNotFoundException e) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+        }
     }
 
     @PostMapping("/")
@@ -66,6 +113,7 @@ public class GoalController {
     )
     @ApiResponse(responseCode = "404", description = "Not found - goal not found")
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
+<<<<<<< HEAD
     public ResponseEntity<?> createGoal(@RequestBody GoalService.CreateGoalEntity createGoalEntity, HttpServletRequest servletRequest) {
         String username = authService.getUsernameFromHttpRequest(servletRequest);
         createGoalEntity.validate();
@@ -81,6 +129,19 @@ public class GoalController {
 
         Goal createdGoal = goalService.createGoal(goal);
         return new ResponseEntity<>(createdGoal.getId(), HttpStatus.CREATED);
+=======
+    public ResponseEntity<Goal> createGoal(@RequestBody GoalInfoEntity goalinfo) {
+        if (goalinfo.username == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        User user = authService.(goalinfo.username); //где сраная функция
+        Goal createdGoal = goalService.createGoal(goalinfo.goal);
+        if (createdGoal == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); //что тут вернуть
+        }
+        createdGoal.setUser(user);
+        return new ResponseEntity<>(createdGoal, HttpStatus.CREATED);
+>>>>>>> 411a6c8 (check controller)
     }
 
 
@@ -92,6 +153,7 @@ public class GoalController {
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     public ResponseEntity<Goal> updateGoal(
             @PathVariable Long id,
+<<<<<<< HEAD
             @RequestBody GoalService.CreateGoalEntity.UpdateGoalEntity updateGoalEntity,
             HttpServletRequest servletRequest
     ) {
@@ -109,6 +171,16 @@ public class GoalController {
         }
         Goal updatedGoal = goalService.updateGoal(goal);
         return ResponseEntity.ok(updatedGoal);
+=======
+            @RequestBody Map<String, Object> updates
+    ) {
+        try {
+            Goal updatedGoal = goalService.updateGoal(id, updates);
+            return ResponseEntity.ok(updatedGoal);
+        } catch (GoalNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Goal not found");
+        }
+>>>>>>> 411a6c8 (check controller)
     }
 
     @DeleteMapping("/{id}")
@@ -118,8 +190,13 @@ public class GoalController {
     @ApiResponse(responseCode = "403", description = "Forbidden - user does not own the goal")
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     public ResponseEntity<?> deleteGoal(@PathVariable Long id, HttpServletRequest servletRequest) {
+<<<<<<< HEAD
         String username = authService.getUsernameFromHttpRequest(servletRequest);
         Goal goal = goalService.getGoalById(id);
+=======
+        String username = authService.getUsernameByHttpRequest(servletRequest);
+         Goal goal = goalService.getGoalById(id);
+>>>>>>> 411a6c8 (check controller)
         if (!goal.getUser().getUsername().equals(username)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
