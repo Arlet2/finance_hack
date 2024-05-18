@@ -56,7 +56,7 @@ public class PaymentInfoService {
 
         if (save.getPaymentType() == PaymentType.SAVED) {
             User user = changeUserCurrentWasting(save.getUser(), save.getSum());
-//            userService.
+//            userService.updateUserByUsername();
         }
 
         if (save.getPaymentType() == PaymentType.FOR_GOAL) {

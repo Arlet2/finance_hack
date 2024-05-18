@@ -10,7 +10,6 @@ import su.arlet.finance_hack.core.Goal;
 import su.arlet.finance_hack.core.User;
 import su.arlet.finance_hack.exceptions.AuthFailedException;
 import su.arlet.finance_hack.exceptions.EntityNotFoundException;
-import su.arlet.finance_hack.exceptions.EntityWasAlreadyRemovedException;
 import su.arlet.finance_hack.repos.GoalRepo;
 
 import java.time.LocalDate;
@@ -43,7 +42,7 @@ public class GoalService {
     }
 
     public void deleteGoal(Long id, User user) {
-        Goal goal = goalRepo.findById(id).orElseThrow(EntityWasAlreadyRemovedException::new);
+        Goal goal = goalRepo.findById(id).orElseThrow(EntityNotFoundException::new);
         if (goal.getUser().getUsername().equals(user.getUsername())) {
             throw new AuthFailedException();
         }
@@ -118,7 +117,7 @@ public class GoalService {
 
         @Getter
         @Setter
-        public class UpdateGoalEntity {
+        public static class UpdateGoalEntity {
 
             private Long sum;
             private LocalDate deadline;

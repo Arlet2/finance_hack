@@ -78,9 +78,9 @@ class ErrorHandler {
         return "wrong password";
     }
 
-    @ExceptionHandler(RepoAlreadyDeleteException.class)
+    @ExceptionHandler(EntityWasAlreadyDeleteException.class)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public String handleRepoAlreadyDeleteException(RepoAlreadyDeleteException e) {
+    public String handleRepoAlreadyDeleteException(EntityWasAlreadyDeleteException e) {
         repoAlreadyDeletedCounter.increment();
         return "repo has already been deleted";
     }

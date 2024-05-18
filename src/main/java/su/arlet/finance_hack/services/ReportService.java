@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import su.arlet.finance_hack.controllers.rest.ValidationException;
 import su.arlet.finance_hack.core.*;
 import su.arlet.finance_hack.core.enums.Period;
-import su.arlet.finance_hack.exceptions.RepoAlreadyDeleteException;
+import su.arlet.finance_hack.exceptions.EntityWasAlreadyDeleteException;
 import su.arlet.finance_hack.exceptions.WasteAlreadyDeletedException;
 import su.arlet.finance_hack.repos.PaymentInfoRepo;
 import su.arlet.finance_hack.repos.ReportRepo;
@@ -36,7 +36,7 @@ public class ReportService {
 
 
     public void deleteReport(Long id) {
-        Report report = reportRepo.findById(id).orElseThrow(RepoAlreadyDeleteException::new);
+        Report report = reportRepo.findById(id).orElseThrow(EntityWasAlreadyDeleteException::new);
         reportRepo.deleteById(id);
     }
 

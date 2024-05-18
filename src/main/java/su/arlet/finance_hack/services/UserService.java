@@ -11,7 +11,7 @@ import su.arlet.finance_hack.core.Goal;
 import su.arlet.finance_hack.core.Report;
 import su.arlet.finance_hack.core.User;
 import su.arlet.finance_hack.exceptions.IncorrectUsernameException;
-import su.arlet.finance_hack.exceptions.RepoAlreadyDeleteException;
+import su.arlet.finance_hack.exceptions.EntityWasAlreadyDeleteException;
 import su.arlet.finance_hack.exceptions.UserNotFoundException;
 import su.arlet.finance_hack.repos.UserRepo;
 import su.arlet.finance_hack.utils.SHA1Hasher;
@@ -45,7 +45,7 @@ public class UserService {
 
     public void delete(String username) {
         if (!userRepo.existsByUsername(username)) {
-            throw new RepoAlreadyDeleteException();
+            throw new EntityWasAlreadyDeleteException();
         }
         userRepo.deleteById(username);
 
