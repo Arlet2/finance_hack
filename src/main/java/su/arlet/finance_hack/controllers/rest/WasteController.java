@@ -15,6 +15,8 @@ import su.arlet.finance_hack.exceptions.UserNotFoundException;
 import su.arlet.finance_hack.services.AuthService;
 import su.arlet.finance_hack.services.PaymentInfoService;
 
+
+// TODO : использовать общие exceptions
 @RestController
 @RequestMapping("/wastes")
 @Tag(name = "WASTE API")
@@ -49,7 +51,7 @@ public class WasteController {
         return new ResponseEntity<>(paymentInfoService.addWaste(info), HttpStatus.OK);
     }
 
-    @PostMapping("/{username}")
+    @DeleteMapping("/{username}")
     @Operation(summary = "delete the expense")
     @ApiResponse(responseCode = "200", description = "Success - a expense has been removed")
     @ApiResponse(responseCode = "204", description = "expense has already been deleted")

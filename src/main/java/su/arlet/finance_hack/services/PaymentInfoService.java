@@ -24,7 +24,7 @@ public class PaymentInfoService {
     }
 
     public Long addWaste(PaymentInfo info) {
-
+        info.validate();
 
         if (info.getItemCategory() != null) {
             Optional<ItemCategory> itemCategoryByName =
