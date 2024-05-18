@@ -5,8 +5,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import su.arlet.finance_hack.controllers.rest.ValidationException;
 <<<<<<< HEAD
+<<<<<<< HEAD
 import su.arlet.finance_hack.core.*;
 =======
+=======
+>>>>>>> cc7f71a (Validate DataAndPeriod)
 import su.arlet.finance_hack.core.Report;
 import su.arlet.finance_hack.core.ReportCategory;
 import su.arlet.finance_hack.core.ReportComparison;
@@ -112,6 +115,16 @@ public class ReportService {
         }
         return Optional.empty();
     }
+//    public Optional<ReportComparison> compareReports(int firstMonth, int firstYear, int secondMonth, int secondYear, Period period) {
+//        List<Report> firstReports = reportRepo.findReportsByMonthAndYear(firstMonth, firstYear, period);
+//        List<Report> secondReports = reportRepo.findReportsByMonthAndYear(secondMonth, secondYear, period);
+//
+//        if (!firstReports.isEmpty() && !secondReports.isEmpty()) {
+//            ReportComparison comparison = new ReportComparison(firstReports.get(0), secondReports.get(0));
+//            return Optional.of(comparison);
+//        }
+//        return Optional.empty();
+//    }
 
     public ComparisonResult displayDifferences(ReportComparison comparison) {
         Map<String, Long> categoryDifferences = calculateCategoryDifferences(comparison.getFirstReport(), comparison.getSecondReport());
@@ -188,6 +201,7 @@ public class ReportService {
 
         public void validate() {
 <<<<<<< HEAD
+<<<<<<< HEAD
             int currentYear = LocalDate.now().getYear();
             int currentMonth = LocalDate.now().getMonthValue();
             if (firstMonth != currentMonth) throw new ValidationException("Month can't be not positive");
@@ -195,11 +209,16 @@ public class ReportService {
             if (secondMonth != currentMonth) throw new ValidationException("Month can't be not positive");
             if (secondYear != currentYear) throw new ValidationException("Month can't be not positive");
 =======
+=======
+>>>>>>> cc7f71a (Validate DataAndPeriod)
             if (firstMonth < 0) throw new ValidationException("Month can't be not positive");
             if (firstYear < 0) throw new ValidationException("Year can't be not positive");
             if (secondMonth < 0) throw new ValidationException("Month can't be not positive");
             if (secondYear < 0) throw new ValidationException("Month can't be not positive");
+<<<<<<< HEAD
 >>>>>>> 267c39a (Resolve merge conflict by incorporating both suggestions)
+=======
+>>>>>>> cc7f71a (Validate DataAndPeriod)
             if (Period.isEnumContains(period)) throw new ValidationException("period can't be not in enum");
         }
     }
