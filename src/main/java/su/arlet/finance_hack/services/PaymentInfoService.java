@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import su.arlet.finance_hack.core.*;
 import su.arlet.finance_hack.core.enums.PaymentType;
 import su.arlet.finance_hack.exceptions.EntityNotFoundException;
@@ -44,6 +45,7 @@ public class PaymentInfoService {
         );
     }
 
+    @Transactional
     public Long addWaste(PaymentInfo info) {
         info.validate();
 
@@ -79,6 +81,7 @@ public class PaymentInfoService {
     }
 
 
+    @Transactional
     public void deleteWaste(Long paymentId) {
         PaymentInfo info = paymentInfoRepo.findById(paymentId).orElseThrow(EntityWasAlreadyDeletedException::new);
 
@@ -98,6 +101,8 @@ public class PaymentInfoService {
         return paymentInfoRepo.findById(id).orElseThrow(EntityWasAlreadyDeletedException::new);
     }
 
+
+    @Transactional
     public List<PaymentInfo> updateWastes(List<PaymentInfo> paymentInfoList) {
         paymentInfoList.forEach(PaymentInfo::validate);
 
