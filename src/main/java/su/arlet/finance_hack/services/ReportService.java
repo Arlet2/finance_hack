@@ -44,7 +44,7 @@ public class ReportService {
         reportRepo.deleteById(id);
     }
 
-    private Timestamp getStartDateByPeriod(String periodType) {
+    public Timestamp getStartDateByPeriod(String periodType) {
         Calendar calendar = Calendar.getInstance();
         switch (periodType.toUpperCase()) {
             case "DAILY":
