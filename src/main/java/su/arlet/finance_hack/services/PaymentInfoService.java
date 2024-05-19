@@ -58,11 +58,11 @@ public class PaymentInfoService {
             } else {
                 ItemCategory itemCategory = itemCategoryRepo.save(info.getItemCategory());
                 info.setItemCategory(itemCategory);
-                wasteCounter.increment();
             }
         }
 
         PaymentInfo save = paymentInfoRepo.save(info);
+        wasteCounter.increment();
 
         if (save.getPaymentType() == PaymentType.SAVED) {
             User user = changeUserCurrentWasting(save.getUser(), save.getSum());
@@ -83,7 +83,8 @@ public class PaymentInfoService {
 
     @Transactional
     public void deleteWaste(Long paymentId) {
-        PaymentInfo info = paymentInfoRepo.findById(paymentId).orElseThrow(EntityWasAlreadyDeletedException::new);
+        PaymentInfo info = paymentInfoRepo.findById(paymentId)
+                .orElseThrow(EntityWasAlreadyDeletedException::new);
 
         if (info.getPaymentType() == PaymentType.SAVED) {
             User user = changeUserCurrentWasting(info.getUser(), -info.getSum());
@@ -143,12 +144,12 @@ public class PaymentInfoService {
     private User changeUserCurrentWasting(User user, long wastingSum) {
 
         user.setCurrentWastings(user.getCurrentWastings() + wastingSum);
-        if (user.getLimit() <= 0 && user.getLimit() < user.getCurrentWastings() && wastingSum > 0)
+        if (user.getLimit() > 0 && user.getLimit() < user.getCurrentWastings() && wastingSum > 0)
             sender.sendNotification(new Notification(
                     "You have exceeded your limit",
                     NotificationType.INTERNAL,
                     null));
-        else if (user.getLimit() <= 0 && (double) user.getCurrentWastings() / user.getLimit() >= 0.8 && wastingSum > 0)
+        else if (user.getLimit() > 0 && (double) user.getCurrentWastings() / user.getLimit() >= 0.8 && wastingSum > 0)
             sender.sendNotification(new Notification(
                     "You're approaching your spending limits",
                     NotificationType.INTERNAL,

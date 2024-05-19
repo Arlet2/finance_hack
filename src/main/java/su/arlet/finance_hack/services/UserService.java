@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service;
 import su.arlet.finance_hack.core.Goal;
 import su.arlet.finance_hack.core.Report;
 import su.arlet.finance_hack.core.User;
-import su.arlet.finance_hack.repos.GoalRepo;
-import su.arlet.finance_hack.repos.ReportRepo;
 import su.arlet.finance_hack.exceptions.EntityNotFoundException;
 import su.arlet.finance_hack.exceptions.EntityWasAlreadyDeletedException;
 import su.arlet.finance_hack.exceptions.ValidationException;
+import su.arlet.finance_hack.repos.GoalRepo;
+import su.arlet.finance_hack.repos.ReportRepo;
 import su.arlet.finance_hack.repos.UserRepo;
 import su.arlet.finance_hack.utils.SHA1Hasher;
 
@@ -162,8 +162,8 @@ public class UserService {
             if (this.password == null || this.password.isEmpty()) {
                 throw new ValidationException("password is empty");
             }
-            if (this.birthday == null || (birthday.isBefore(LocalDate.now()))) {
-                throw new ValidationException("birthday is null");
+            if (this.birthday == null || (birthday.isAfter(LocalDate.now()))) {
+                throw new ValidationException("birthday incorrect");
             }
             if (this.email == null || this.email.isEmpty()) {
                 throw new ValidationException("email is empty");
