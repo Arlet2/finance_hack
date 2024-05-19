@@ -1,5 +1,4 @@
 package su.arlet.finance_hack;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -7,8 +6,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import su.arlet.finance_hack.core.Goal;
+import su.arlet.finance_hack.core.User;
+import su.arlet.finance_hack.exceptions.AuthFailedException;
 import su.arlet.finance_hack.exceptions.EntityNotFoundException;
-import su.arlet.finance_hack.exceptions.EntityWasAlreadyRemovedException;
 import su.arlet.finance_hack.repos.GoalRepo;
 import su.arlet.finance_hack.services.GoalService;
 
@@ -29,9 +29,13 @@ public class GoalServiceTest {
     private GoalService goalService;
 
     private Goal testGoal;
+    private User testUser;
 
     @BeforeEach
     void setUp() {
+        testUser = new User();
+        testUser.setUsername("testuser");
+
         testGoal = new Goal();
         testGoal.setId(1L);
         testGoal.setSum(1000L);
@@ -39,6 +43,7 @@ public class GoalServiceTest {
         testGoal.setDeadline(LocalDate.now().plusMonths(6));
         testGoal.setName("Test Goal");
         testGoal.setDescription("Test Description");
+        testGoal.setUser(testUser);
         testGoal.setDone(false);
     }
 
@@ -85,7 +90,7 @@ public class GoalServiceTest {
     void testDeleteGoal() {
         when(goalRepo.findById(1L)).thenReturn(Optional.of(testGoal));
 
-        goalService.deleteGoal(1L);
+        goalService.deleteGoal(1L, testUser);
 
         verify(goalRepo).deleteById(1L);
     }
@@ -94,7 +99,17 @@ public class GoalServiceTest {
     void testDeleteGoalNotFound() {
         when(goalRepo.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(EntityWasAlreadyRemovedException.class, () -> goalService.deleteGoal(1L));
+        assertThrows(EntityNotFoundException.class, () -> goalService.deleteGoal(1L, testUser));
+    }
+
+    @Test
+    void testDeleteGoalAuthFailed() {
+        User anotherUser = new User();
+        anotherUser.setUsername("anotheruser");
+
+        when(goalRepo.findById(1L)).thenReturn(Optional.of(testGoal));
+
+        assertThrows(AuthFailedException.class, () -> goalService.deleteGoal(1L, anotherUser));
     }
 
     @Test
@@ -103,6 +118,18 @@ public class GoalServiceTest {
         when(goalRepo.findByIsDone(false)).thenReturn(goals);
 
         List<Goal> result = goalService.getGoalsByIsDone(false);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(testGoal.getId(), result.get(0).getId());
+    }
+
+    @Test
+    void testGetGoalsByUser() {
+        List<Goal> goals = List.of(testGoal);
+        when(goalRepo.findByUser(testUser)).thenReturn(goals);
+
+        List<Goal> result = goalService.getGoalsByUser(testUser);
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -190,4 +217,3 @@ public class GoalServiceTest {
         assertThrows(EntityNotFoundException.class, () -> goalService.calculateMonthlyContribution(1L));
     }
 }
-
