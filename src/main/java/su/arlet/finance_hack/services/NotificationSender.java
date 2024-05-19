@@ -20,6 +20,7 @@ public class NotificationSender {
 
     private void send(Notification notification) {
         // do something...
+        System.out.println(notification.getNotificationText());
     }
 
 

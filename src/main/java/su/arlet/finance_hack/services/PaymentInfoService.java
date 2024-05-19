@@ -10,6 +10,7 @@ import su.arlet.finance_hack.core.enums.PaymentType;
 import su.arlet.finance_hack.exceptions.EntityWasAlreadyDeleteException;
 import su.arlet.finance_hack.repos.ItemCategoryRepo;
 import su.arlet.finance_hack.repos.PaymentInfoRepo;
+import su.arlet.finance_hack.repos.UserRepo;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,16 +24,18 @@ public class PaymentInfoService {
     private final GoalService goalService;
     private final NotificationSender sender;
     private final UserService userService;
+    private final UserRepo userRepo;
 
     private final Counter wasteCounter;
 
     @Autowired
-    public PaymentInfoService(PaymentInfoRepo paymentInfoRepo, ItemCategoryRepo itemCategoryRepo, GoalService goalService, NotificationSender sender, UserService userService, AuthService authService, UserService userService1, MeterRegistry meterRegistry) {
+    public PaymentInfoService(PaymentInfoRepo paymentInfoRepo, ItemCategoryRepo itemCategoryRepo, GoalService goalService, NotificationSender sender, UserService userService, AuthService authService, UserService userService1, UserRepo userRepo, MeterRegistry meterRegistry) {
         this.paymentInfoRepo = paymentInfoRepo;
         this.itemCategoryRepo = itemCategoryRepo;
         this.goalService = goalService;
         this.sender = sender;
         this.userService = userService1;
+        this.userRepo = userRepo;
         wasteCounter = meterRegistry.counter("waste_counter");
     }
 
@@ -56,7 +59,7 @@ public class PaymentInfoService {
 
         if (save.getPaymentType() == PaymentType.SAVED) {
             User user = changeUserCurrentWasting(save.getUser(), save.getSum());
-//            userService.updateUserByUsername();
+            userRepo.save(user);
         }
 
         if (save.getPaymentType() == PaymentType.FOR_GOAL) {
@@ -84,7 +87,8 @@ public class PaymentInfoService {
         PaymentInfo info = paymentInfoRepo.findById(paymentId).orElseThrow(EntityWasAlreadyDeleteException::new);
 
         if (info.getPaymentType() == PaymentType.SAVED) {
-            // TODO : добавить работу с лимитами трат
+            User user = changeUserCurrentWasting(info.getUser(), -info.getSum());
+            userRepo.save(user);
         }
 
         // TODO: что делать в случае отката банком операции с типом FOR_GOAL? Пока просто не будем поддерживать операцию удаления
@@ -136,17 +140,22 @@ public class PaymentInfoService {
     }
 
     private User changeUserCurrentWasting(User user, long wastingSum) {
+
         user.setCurrentWastings(user.getCurrentWastings() + wastingSum);
-        if (user.getLimit() < user.getCurrentWastings())
+        if (user.getLimit() <= 0 && user.getLimit() < user.getCurrentWastings() && wastingSum > 0)
             sender.sendNotification(new Notification(
                     "You have exceeded your limit",
                     NotificationType.INTERNAL,
                     null));
-        else if ((double) user.getCurrentWastings() / user.getLimit() >= 0.8)
+        else if (user.getLimit() <= 0 && (double) user.getCurrentWastings() / user.getLimit() >= 0.8 && wastingSum > 0)
             sender.sendNotification(new Notification(
                     "You're approaching your spending limits",
                     NotificationType.INTERNAL,
                     null));
+
+        if (user.getCurrentWastings() < 0)
+            user.setCurrentWastings(0);
+
         return user;
     }
 

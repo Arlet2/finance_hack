@@ -40,7 +40,7 @@ public class WasteController {
 
     @PostMapping("/{username}")
     @Operation(summary = "execute new waste")
-    @ApiResponse(responseCode = "200", description = "Success - a new expense has been recorded", content = {
+    @ApiResponse(responseCode = "201", description = "Success - a new expense has been recorded", content = {
             @Content(schema = @Schema(implementation = Long.class))
     }
     )
@@ -57,7 +57,7 @@ public class WasteController {
         }
 
         info.setUser(user);
-        return new ResponseEntity<>(paymentInfoService.addWaste(info), HttpStatus.OK);
+        return new ResponseEntity<>(paymentInfoService.addWaste(info), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{username}")
