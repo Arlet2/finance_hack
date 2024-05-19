@@ -13,19 +13,28 @@ import su.arlet.finance_hack.core.User;
 import su.arlet.finance_hack.exceptions.IncorrectUsernameException;
 import su.arlet.finance_hack.exceptions.EntityWasAlreadyDeleteException;
 import su.arlet.finance_hack.exceptions.UserNotFoundException;
+import su.arlet.finance_hack.repos.GoalRepo;
+import su.arlet.finance_hack.repos.ReportRepo;
 import su.arlet.finance_hack.repos.UserRepo;
 import su.arlet.finance_hack.utils.SHA1Hasher;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
     private final UserRepo userRepo;
+    private final GoalRepo goalRepo;
+    private final ReportRepo reportRepo;
 
     @Autowired
-    public UserService(UserRepo userRepo) {
+    public UserService(UserRepo userRepo, GoalRepo goalRepo, ReportRepo reportRepo) {
         this.userRepo = userRepo;
+        this.goalRepo = goalRepo;
+        this.reportRepo = reportRepo;
     }
 
     public long getLimit(String username) {
@@ -35,6 +44,7 @@ public class UserService {
         User user = userRepo.getUserByUsername(username);
         return user.getLimit();
     }
+
     public long getCurrentWastings(String username) {
         if (username == null || username.isEmpty()) {
             throw new IncorrectUsernameException();
@@ -69,38 +79,75 @@ public class UserService {
         }
         User user = getByUsername(username);
 
-        String hashPassword = user.getHashPassword();
+        String hashPassword;
         if (updateUserEntity.password != null) {
             hashPassword = SHA1Hasher.toSHA1(updateUserEntity.password);
+        } else {
+            hashPassword = user.getHashPassword();
         }
 
-        LocalDate birthday = user.getBirthday();
+        LocalDate birthday;
         if (updateUserEntity.birthday != null) {
             birthday = updateUserEntity.birthday;
+        } else {
+            birthday = user.getBirthday();
         }
 
-        String email = user.getEmail();
+        String email;
         if (updateUserEntity.email != null) {
             email = updateUserEntity.email;
+        } else {
+            email = user.getEmail();
         }
-        long wastings = user.getCurrentWastings();
+
+        long wastings;
         if (updateUserEntity.currentWastings != null) {
             wastings = updateUserEntity.currentWastings;
+        } else {
+            wastings = user.getCurrentWastings();
         }
 
-        Goal[] goals = user.getGoals();
-        if (updateUserEntity.goals != null) {
-            goals = updateUserEntity.goals;
+        Goal[] goals;
+        if (updateUserEntity.goalIds != null) {
+            List<Long> goalIds = updateUserEntity.goalIds;
+
+            List<Goal> goalList = new ArrayList<>();
+            for (Long num : goalIds) {
+                Optional<Goal> optionalGoal = goalRepo.findById(num);
+                optionalGoal.ifPresent(goalList::add);
+            }
+            goals = new Goal[goalList.size()];
+            for (int i = 0; i < goalList.size(); i++) {
+                goals[i] = goalList.get(i);
+            }
+            // TODO remove for method for casting
+        } else {
+            goals = user.getGoals();
         }
 
-        Report[] reports = user.getReports();
-        if (updateUserEntity.reports != null) {
-            reports = updateUserEntity.reports;
+        Report[] reports;
+        if (updateUserEntity.reportIds != null) {
+            List<Long> reportIds = updateUserEntity.reportIds;
+
+            List<Report> reportList = new ArrayList<>();
+            for (Long num : reportIds) {
+                Optional<Report> optionalReport = reportRepo.findById(num);
+                optionalReport.ifPresent(reportList::add);
+            }
+            reports = new Report[reportList.size()];
+            for (int i = 0; i < reportList.size(); i++) {
+                reports[i] = reportList.get(i);
+            }
+            // TODO remove for method for casting
+        } else {
+            reports = user.getReports();
         }
 
-        long limit = user.getLimit();
+        long limit;
         if (updateUserEntity.limit != null) {
             limit = updateUserEntity.limit;
+        } else {
+            limit = user.getLimit();
         }
         User updatedUser = new User(
                 user.getUsername(),
@@ -136,7 +183,7 @@ public class UserService {
             if (this.password == null || this.password.isEmpty()) {
                 throw new ValidationException("password is empty");
             }
-            if (this.birthday == null) {
+            if (this.birthday == null || (birthday.isBefore(LocalDate.now()))) {
                 throw new ValidationException("birthday is null");
             }
             if (this.email == null || this.email.isEmpty()) {
@@ -160,9 +207,9 @@ public class UserService {
 
         private Long currentWastings;
 
-        private Goal[] goals;
+        private List<Long> goalIds;
 
-        private Report[] reports;
+        private List<Long> reportIds;
 
         private Long limit;
 
@@ -175,6 +222,9 @@ public class UserService {
             }
             if (this.limit != null && this.limit < 0) {
                 throw new ValidationException("limit mustn't be negative");
+            }
+            if (this.birthday != null && (birthday.isAfter(LocalDate.now()))) {
+                throw new ValidationException("birthday is null");
             }
         }
     }

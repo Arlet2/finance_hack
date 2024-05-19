@@ -69,7 +69,7 @@ public class UserController {
     ) {
         loginUser.validate();
         String jwtToken = authService.loginUser(loginUser.getUsername(), loginUser.getPassword());
-        return ResponseEntity.status(HttpStatus.CREATED).body(jwtToken);
+        return ResponseEntity.status(HttpStatus.OK).body(jwtToken);
     }
 
 
