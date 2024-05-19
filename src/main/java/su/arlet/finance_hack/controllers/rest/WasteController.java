@@ -1,5 +1,6 @@
 package su.arlet.finance_hack.controllers.rest;
 
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,8 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import su.arlet.finance_hack.core.PaymentInfo;
 import su.arlet.finance_hack.core.User;
-import su.arlet.finance_hack.exceptions.UserNotFoundException;
-import su.arlet.finance_hack.services.AuthService;
+import su.arlet.finance_hack.exceptions.EntityNotFoundException;
+import su.arlet.finance_hack.exceptions.ValidationException;
 import su.arlet.finance_hack.services.PaymentInfoService;
 import su.arlet.finance_hack.services.UserService;
 
@@ -25,17 +26,15 @@ import su.arlet.finance_hack.services.UserService;
 public class WasteController {
 
     private final PaymentInfoService paymentInfoService;
-    private final AuthService authService;
     private final UserService userService;
 
-//    private final Counter bankFaultCounter;
+    private final Counter bankFaultCounter;
 
     @Autowired
-    public WasteController(PaymentInfoService paymentInfoService, AuthService authService, MeterRegistry meterRegistry, UserService userService) {
+    public WasteController(PaymentInfoService paymentInfoService, MeterRegistry meterRegistry, UserService userService) {
         this.paymentInfoService = paymentInfoService;
-        this.authService = authService;
         this.userService = userService;
-        //bankFaultCounter = meterRegistry.counter("finance_bank_fault_counter");
+        bankFaultCounter = meterRegistry.counter("finance_bank_fault_counter");
     }
 
     @PostMapping("/{username}")
@@ -52,7 +51,7 @@ public class WasteController {
         User user = userService.getByUsername(username);
 
         if (info == null) {
-            //bankFaultCounter.inc();
+            bankFaultCounter.increment();
             throw new ValidationException("PaymentInfo is not set");
         }
 
@@ -69,7 +68,7 @@ public class WasteController {
     public ResponseEntity<?> deleteWaste(@RequestParam Long id, @PathVariable String username) {
         PaymentInfo paymentInfo = paymentInfoService.getByIdBeforeDeleting(id);
         if (!paymentInfo.getUser().getUsername().equals(username)) {
-            throw new UserNotFoundException();
+            throw new EntityNotFoundException("user");
         }
         paymentInfoService.deleteWaste(id);
         return new ResponseEntity<>(HttpStatus.OK);

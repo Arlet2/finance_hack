@@ -13,10 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import su.arlet.finance_hack.core.Goal;
 import su.arlet.finance_hack.core.User;
-import su.arlet.finance_hack.exceptions.InvalidAuthorizationHeaderException;
 import su.arlet.finance_hack.services.AuthService;
 import su.arlet.finance_hack.services.GoalService;
-import su.arlet.finance_hack.services.UserService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -30,26 +28,27 @@ public class GoalController {
 
     private final GoalService goalService;
     private final AuthService authService;
-    private final UserService userService;
 
     @Autowired
-    public GoalController(GoalService goalService, AuthService authService, UserService userService) {
+    public GoalController(GoalService goalService, AuthService authService) {
         this.goalService = goalService;
         this.authService = authService;
-        this.userService = userService;
     }
 
 
     @GetMapping("/{id}")
     @Operation(summary = "Get goal by ID")
-    @ApiResponse(responseCode = "200", description = "Success - found goal", content = {
-            @Content(schema = @Schema(implementation = Goal.class))
-    }
+    @ApiResponse(
+            responseCode = "200", description = "Success - found goal",
+            content = {@Content(schema = @Schema(implementation = Goal.class))}
     )
+    @ApiResponse(responseCode = "403", description = "Access denied")
     @ApiResponse(responseCode = "404", description = "Not found - goal not found")
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
-    public ResponseEntity<Goal> getGoalByID(@PathVariable Long id) {
-        Goal goal = goalService.getGoalById(id);
+    public ResponseEntity<Goal> getGoalByID(HttpServletRequest httpServletRequest, @PathVariable Long id) {
+        User user = authService.getUserFromHttpRequest(httpServletRequest);
+        Goal goal = goalService.getGoalById(id, user);
+
         return ResponseEntity.ok(goal);
     }
 
@@ -68,51 +67,31 @@ public class GoalController {
     @ApiResponse(responseCode = "404", description = "Not found - goal not found")
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     public ResponseEntity<?> createGoal(@RequestBody GoalService.CreateGoalEntity createGoalEntity, HttpServletRequest servletRequest) {
-        String username = authService.getUsernameFromHttpRequest(servletRequest);
+        User user = authService.getUserFromHttpRequest(servletRequest);
         createGoalEntity.validate();
-        User user = userService.getByUsername(username);
-        if (user == null) {
-            throw new InvalidAuthorizationHeaderException();
-        }
-        Goal goal = new Goal();
-        goal.setName(createGoalEntity.getName());
-        goal.setSum(createGoalEntity.getSum());
-        goal.setDeadline(createGoalEntity.getDeadline());
-        goal.setPriority(createGoalEntity.getPriority());
-        goal.setUser(user);
 
-        Long createdId = goalService.createGoal(goal);
+        Long createdId = goalService.createGoal(createGoalEntity, user);
         return new ResponseEntity<>(createdId, HttpStatus.CREATED);
     }
 
 
     @PatchMapping("/{id}")
     @Operation(summary = "Update goal")
-    @ApiResponse(responseCode = "200", description = "Success - updated goal", content = {@Content(schema = @Schema(implementation = Goal.class))})
+    @ApiResponse(responseCode = "200", description = "Success - updated goal", content = {@Content()})
     @ApiResponse(responseCode = "400", description = "Bad body", content = {@Content(schema = @Schema(implementation = String.class))})
+    @ApiResponse(responseCode = "403", description = "Access denied")
     @ApiResponse(responseCode = "404", description = "Not found - goal not found", content = {@Content()})
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     public ResponseEntity<Goal> updateGoal(
             @PathVariable Long id,
-            @RequestBody GoalService.CreateGoalEntity.UpdateGoalEntity updateGoalEntity,
+            @RequestBody GoalService.UpdateGoalEntity updateGoalEntity,
             HttpServletRequest servletRequest
     ) {
-        Goal goal = goalService.getGoalById(id);
-        String username = authService.getUsernameFromHttpRequest(servletRequest);
-        if (!goal.getUser().getUsername().equals(username)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+        User user = authService.getUserFromHttpRequest(servletRequest);
+
         updateGoalEntity.validate();
-        if (updateGoalEntity.getSum() != null) {
-            goal.setSum(updateGoalEntity.getSum());
-        }
-        if (updateGoalEntity.getDeadline() != null) {
-            goal.setDeadline(updateGoalEntity.getDeadline());
-        }
-        if (updateGoalEntity.getPriority() != null) {
-            goal.setPriority(updateGoalEntity.getPriority());
-        }
-        Goal updatedGoal = goalService.updateGoal(goal);
+
+        Goal updatedGoal = goalService.updateGoal(id, user, updateGoalEntity);
         return ResponseEntity.ok(updatedGoal);
     }
 
@@ -123,17 +102,15 @@ public class GoalController {
     @ApiResponse(responseCode = "403", description = "Forbidden - user does not own the goal")
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     public ResponseEntity<?> deleteGoal(@PathVariable Long id, HttpServletRequest servletRequest) {
-        String username = authService.getUsernameFromHttpRequest(servletRequest);
-        User user = userService.getByUsername(username);
+        User user = authService.getUserFromHttpRequest(servletRequest);
+
         goalService.deleteGoal(id, user);
         return ResponseEntity.ok(null);
     }
 
     @GetMapping("/")
     @ApiResponse(responseCode = "200", description = "OK",
-            content = {
-                    @Content(array = @ArraySchema(schema = @Schema(implementation = Goal.class)))
-            })
+            content = {@Content(array = @ArraySchema(schema = @Schema(implementation = Goal.class)))})
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     @Operation(summary = "Get goals by filters")
     public ResponseEntity<List<Goal>> getGoals(

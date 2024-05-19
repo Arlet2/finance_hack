@@ -5,8 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import su.arlet.finance_hack.controllers.rest.ValidationException;
 import su.arlet.finance_hack.core.enums.PaymentType;
+import su.arlet.finance_hack.exceptions.ValidationException;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;

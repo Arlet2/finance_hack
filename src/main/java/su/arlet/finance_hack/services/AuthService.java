@@ -13,12 +13,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import su.arlet.finance_hack.controllers.rest.ValidationException;
 import su.arlet.finance_hack.core.User;
-import su.arlet.finance_hack.exceptions.InvalidAuthorizationHeaderException;
-import su.arlet.finance_hack.exceptions.UserAlreadyExistsException;
-import su.arlet.finance_hack.exceptions.UserNotFoundException;
-import su.arlet.finance_hack.exceptions.WrongPasswordException;
+import su.arlet.finance_hack.exceptions.*;
 import su.arlet.finance_hack.repos.UserRepo;
 import su.arlet.finance_hack.utils.SHA1Hasher;
 
@@ -55,7 +51,7 @@ public class AuthService {
                 0, null, null, 0
         );
         if (userRepo.existsByUsername(user.getUsername())) {
-            throw new UserAlreadyExistsException();
+            throw new EntityAlreadyExistsException("user");
         } else {
             userRepo.save(user);
             registerCounter.increment();
@@ -65,7 +61,7 @@ public class AuthService {
 
     public String loginUser(String username, String password) {
         if (!userRepo.existsByUsername(username)) {
-            throw new UserNotFoundException();
+            throw new EntityNotFoundException("user");
         }
         User user = userService.getByUsername(username);
         if (!user.getHashPassword().equals(SHA1Hasher.toSHA1(password))) {
@@ -77,12 +73,11 @@ public class AuthService {
 
 
     public String generateJwtToken(String username) {
-        String token = JWT.create()
+        return JWT.create()
                 .withIssuer("finance")
                 .withExpiresAt(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7)) // 1 week
                 .withSubject(username)
                 .sign(algorithm);
-        return token;
     }
 
     public String decodeJwtToken(String token) {
@@ -91,14 +86,20 @@ public class AuthService {
         return decodedJWT.getSubject();
     }
 
-
-    public String getUsernameFromHttpRequest(HttpServletRequest req) {
+    public User getUserFromHttpRequest(HttpServletRequest req) {
         String auth = req.getHeader("Authorization");
 
         if (auth != null) {
             String[] parsedHeader = auth.split(" ");
-            if (parsedHeader.length == 2 && (parsedHeader[0].equalsIgnoreCase("bearer")))
-                return decodeJwtToken(parsedHeader[1]);
+            if (parsedHeader.length == 2 && (parsedHeader[0].equalsIgnoreCase("bearer"))) {
+                String username = decodeJwtToken(parsedHeader[1]);
+                var user = userRepo.getUserByUsername(username);
+
+                if (user == null)
+                    throw new EntityNotFoundException("user");
+
+                return user;
+            }
         }
         throw new InvalidAuthorizationHeaderException();
     }

@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import su.arlet.finance_hack.core.Report;
 import su.arlet.finance_hack.core.ReportComparison;
-import su.arlet.finance_hack.exceptions.UserNotFoundException;
 import su.arlet.finance_hack.services.AuthService;
 import su.arlet.finance_hack.services.ReportService;
 
@@ -38,26 +37,13 @@ public class ReportController {
 
     @GetMapping("/")
     @Operation(summary = "get reports by filters")
-    @ApiResponse(responseCode = "200", description = "Success - report deleted", content = {
+    @ApiResponse(responseCode = "200", description = "Success - report received", content = {
             @Content(schema = @Schema(implementation = Report.class))})
     public ResponseEntity<List<Report>> getReports(@RequestParam(required = false) String periodType) {
         List<Report> reports = reportService.getReports(periodType);
         reportsCounter.increment();
         return ResponseEntity.ok(reports);
     }
-//    @GetMapping("/date")
-//    @Operation(summary = "Get report by date")
-//    public ResponseEntity<List<Report>> getReportByDate(@RequestParam Timestamp date) {
-//        List<Report> reports = reportService.getByDate(date);
-//        return ResponseEntity.ok(reports);
-//    }
-//
-//    @GetMapping("/period")
-//    @Operation(summary = "Get reports by period")
-//    public ResponseEntity<List<Report>> getReportsByPeriod(@RequestParam String periodType) {
-//        List<Report> reports = reportService.getReportsByPeriod(periodType);
-//        return ResponseEntity.ok(reports);
-//    }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete report by ID")
@@ -67,7 +53,7 @@ public class ReportController {
     @ApiResponse(responseCode = "403", description = "Forbidden - access denied")
     @ApiResponse(responseCode = "404", description = "Report not found")
     public ResponseEntity<?> deleteReport(HttpServletRequest httpServletRequest, @PathVariable Long id) {
-        reportService.deleteReport(id, authService.getUsernameFromHttpRequest(httpServletRequest));
+        reportService.deleteReport(id, authService.getUserFromHttpRequest(httpServletRequest));
         return ResponseEntity.noContent().build();
     }
 

@@ -6,23 +6,22 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import su.arlet.finance_hack.controllers.rest.ValidationException;
 import su.arlet.finance_hack.core.Goal;
 import su.arlet.finance_hack.core.Report;
 import su.arlet.finance_hack.core.User;
-import su.arlet.finance_hack.exceptions.IncorrectUsernameException;
-import su.arlet.finance_hack.exceptions.EntityWasAlreadyDeleteException;
-import su.arlet.finance_hack.exceptions.UserNotFoundException;
 import su.arlet.finance_hack.repos.GoalRepo;
 import su.arlet.finance_hack.repos.ReportRepo;
+import su.arlet.finance_hack.exceptions.EntityNotFoundException;
+import su.arlet.finance_hack.exceptions.EntityWasAlreadyDeletedException;
+import su.arlet.finance_hack.exceptions.ValidationException;
 import su.arlet.finance_hack.repos.UserRepo;
 import su.arlet.finance_hack.utils.SHA1Hasher;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -37,25 +36,9 @@ public class UserService {
         this.reportRepo = reportRepo;
     }
 
-    public long getLimit(String username) {
-        if (username == null || username.isEmpty()) {
-            throw new IncorrectUsernameException();
-        }
-        User user = userRepo.getUserByUsername(username);
-        return user.getLimit();
-    }
-
-    public long getCurrentWastings(String username) {
-        if (username == null || username.isEmpty()) {
-            throw new IncorrectUsernameException();
-        }
-        User user = userRepo.getUserByUsername(username);
-        return user.getCurrentWastings();
-    }
-
     public void delete(String username) {
         if (!userRepo.existsByUsername(username)) {
-            throw new EntityWasAlreadyDeleteException();
+            throw new EntityWasAlreadyDeletedException();
         }
         userRepo.deleteById(username);
 
@@ -68,14 +51,14 @@ public class UserService {
     public User getByUsername(String userName) {
         User userByUsername = userRepo.getUserByUsername(userName);
         if (userByUsername == null)
-            throw new UserNotFoundException();
+            throw new EntityNotFoundException("user");
 
         return userByUsername;
     }
 
     public void updateUserByUsername(UpdateUserEntity updateUserEntity, String username) {
         if (!userRepo.existsByUsername(username)) {
-            throw new UserNotFoundException();
+            throw new EntityNotFoundException("user");
         }
         User user = getByUsername(username);
 
@@ -101,11 +84,7 @@ public class UserService {
         }
 
         long wastings;
-        if (updateUserEntity.currentWastings != null) {
-            wastings = updateUserEntity.currentWastings;
-        } else {
-            wastings = user.getCurrentWastings();
-        }
+        wastings = Objects.requireNonNullElseGet(updateUserEntity.currentWastings, user::getCurrentWastings);
 
         Goal[] goals;
         if (updateUserEntity.goalIds != null) {

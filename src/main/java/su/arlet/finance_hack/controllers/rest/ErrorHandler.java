@@ -16,8 +16,6 @@ class ErrorHandler {
     private final Counter serverErrorCounter;
     private final Counter badRequestErrorCounter;
     private final Counter conflictErrorCounter;
-    private final Counter unauthorizedErrorCounter;
-    private final Counter contentErrorCounter;
     private final Counter wrondPasswordCounter;
     private final Counter repoAlreadyDeletedCounter;
 
@@ -26,8 +24,6 @@ class ErrorHandler {
         serverErrorCounter = meterRegistry.counter("finance_server_error_counter");
         badRequestErrorCounter = meterRegistry.counter("finance_bad_request_error_counter");
         conflictErrorCounter = meterRegistry.counter("finance_conflict_error_counter");
-        unauthorizedErrorCounter = meterRegistry.counter("finance_unauthorized_error_counter");
-        contentErrorCounter = meterRegistry.counter("finance_content_error_counter");
         wrondPasswordCounter = meterRegistry.counter("finance_wrong_password_counter");
         repoAlreadyDeletedCounter = meterRegistry.counter("finance_repo_already_delete_counter");
     }
@@ -36,13 +32,13 @@ class ErrorHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public void handleAllException(Exception e, HttpServletRequest request) {
         serverErrorCounter.increment();
-        System.out.println("Error in " + request.getMethod() + "( "+ e.getClass().getName()+") "
+        System.out.println("Error in " + request.getMethod() + "( " + e.getClass().getName() + ") "
                 + request.getRequestURL() + ": " + e.getMessage());
     }
 
     @ExceptionHandler(InvalidAuthorizationHeaderException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public String handleInvalidAuthorizationHeaderException(InvalidAuthorizationHeaderException e) {
+    public String handleInvalidAuthorizationHeaderException() {
         return "bad auth header";
     }
 
@@ -55,55 +51,34 @@ class ErrorHandler {
 
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public void handleNotFoundException(EntityNotFoundException e) {
+    public void handleNotFoundException() {
     }
 
-    @ExceptionHandler(UserAlreadyExistsException.class)
+    @ExceptionHandler(EntityAlreadyExistsException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public String handleUserAlreadyExistsException(UserAlreadyExistsException e) {
+    public String handleUserAlreadyExistsException(EntityAlreadyExistsException e) {
         conflictErrorCounter.increment();
-        return "this username has been already taken";
-    }
-
-    @ExceptionHandler(UserNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String handleUserNotFoundException(UserNotFoundException e) {
-        unauthorizedErrorCounter.increment();
-        return "user not found";
+        return e.getMessage();
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public String handleAccessDeniedException(AccessDeniedException e) {
+    public String handleAccessDeniedException() {
         return "access denied";
     }
 
     @ExceptionHandler(WrongPasswordException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public String handleWrongPasswordException(WrongPasswordException e) {
+    public String handleWrongPasswordException() {
         wrondPasswordCounter.increment();
         return "wrong password";
     }
 
-    @ExceptionHandler(EntityWasAlreadyDeleteException.class)
+    @ExceptionHandler(EntityWasAlreadyDeletedException.class)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public String handleRepoAlreadyDeleteException(EntityWasAlreadyDeleteException e) {
+    public String handleRepoAlreadyDeleteException() {
         repoAlreadyDeletedCounter.increment();
         return "repo has already been deleted";
     }
-
-    @ExceptionHandler(AuthFailedException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public String handleAuthFailedException(AuthFailedException e) {
-        return "Access denied / authorization error";
-    }
-
-    @ExceptionHandler(InvalidAuthorizationHeaderException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public String handleInvalidAuthorizationHeaderException(InvalidAuthorizationHeaderException e) {
-        repoAlreadyDeletedCounter.increment();
-        return "User is unauthorized";
-    }
-
 
 }
