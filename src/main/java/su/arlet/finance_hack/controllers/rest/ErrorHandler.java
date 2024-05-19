@@ -98,5 +98,12 @@ class ErrorHandler {
         return "Access denied / authorization error";
     }
 
+    @ExceptionHandler(InvalidAuthorizationHeaderException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public String handleInvalidAuthorizationHeaderException(InvalidAuthorizationHeaderException e) {
+        repoAlreadyDeletedCounter.increment();
+        return "User is unauthorized";
+    }
+
 
 }

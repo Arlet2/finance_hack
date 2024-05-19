@@ -14,16 +14,15 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import su.arlet.finance_hack.controllers.rest.ValidationException;
-import su.arlet.finance_hack.core.Goal;
-import su.arlet.finance_hack.core.Report;
 import su.arlet.finance_hack.core.User;
-import su.arlet.finance_hack.exceptions.*;
+import su.arlet.finance_hack.exceptions.InvalidAuthorizationHeaderException;
+import su.arlet.finance_hack.exceptions.UserAlreadyExistsException;
+import su.arlet.finance_hack.exceptions.UserNotFoundException;
+import su.arlet.finance_hack.exceptions.WrongPasswordException;
 import su.arlet.finance_hack.repos.UserRepo;
 import su.arlet.finance_hack.utils.SHA1Hasher;
 
-import java.time.LocalDate;
 import java.util.Date;
-import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -115,10 +114,10 @@ public class AuthService {
 
         public void validate() {
             if (this.username == null || this.username.isEmpty()) {
-                throw new ValidationException("username");
+                throw new ValidationException("username is empty");
             }
             if (this.password == null || this.password.isEmpty()) {
-                throw new ValidationException("password");
+                throw new ValidationException("password is empty");
             }
 
         }
