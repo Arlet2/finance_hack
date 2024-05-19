@@ -36,7 +36,14 @@ class ErrorHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public void handleAllException(Exception e, HttpServletRequest request) {
         serverErrorCounter.increment();
-        System.out.println("Error in " + request.getMethod() + " " + request.getRequestURL() + ": " + e.getMessage());
+        System.out.println("Error in " + request.getMethod() + "( "+ e.getClass().getName()+") "
+                + request.getRequestURL() + ": " + e.getMessage());
+    }
+
+    @ExceptionHandler(InvalidAuthorizationHeaderException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public String handleInvalidAuthorizationHeaderException(InvalidAuthorizationHeaderException e) {
+        return "bad auth header";
     }
 
     @ExceptionHandler(ValidationException.class)
@@ -62,7 +69,13 @@ class ErrorHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handleUserNotFoundException(UserNotFoundException e) {
         unauthorizedErrorCounter.increment();
-        return "login is incorrectly set / not set at all";
+        return "user not found";
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String handleAccessDeniedException(AccessDeniedException e) {
+        return "access denied";
     }
 
     @ExceptionHandler(WrongPasswordException.class)

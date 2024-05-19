@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import su.arlet.finance_hack.core.Goal;
 import su.arlet.finance_hack.core.User;
+import su.arlet.finance_hack.exceptions.InvalidAuthorizationHeaderException;
 import su.arlet.finance_hack.services.AuthService;
 import su.arlet.finance_hack.services.GoalService;
 import su.arlet.finance_hack.services.UserService;
@@ -71,7 +72,7 @@ public class GoalController {
         createGoalEntity.validate();
         User user = userService.getByUsername(username);
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            throw new InvalidAuthorizationHeaderException();
         }
         Goal goal = new Goal();
         goal.setName(createGoalEntity.getName());
@@ -80,8 +81,8 @@ public class GoalController {
         goal.setPriority(createGoalEntity.getPriority());
         goal.setUser(user);
 
-        Goal createdGoal = goalService.createGoal(goal);
-        return new ResponseEntity<>(createdGoal.getId(), HttpStatus.CREATED);
+        Long createdId = goalService.createGoal(goal);
+        return new ResponseEntity<>(createdId, HttpStatus.CREATED);
     }
 
 

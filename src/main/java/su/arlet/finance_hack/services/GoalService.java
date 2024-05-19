@@ -12,6 +12,7 @@ import su.arlet.finance_hack.core.Goal;
 import su.arlet.finance_hack.core.User;
 import su.arlet.finance_hack.exceptions.AuthFailedException;
 import su.arlet.finance_hack.exceptions.EntityNotFoundException;
+import su.arlet.finance_hack.exceptions.EntityWasAlreadyDeleteException;
 import su.arlet.finance_hack.repos.GoalRepo;
 
 import java.time.LocalDate;
@@ -35,8 +36,8 @@ public class GoalService {
 
     }
 
-    public Goal createGoal(Goal goal) {
-        return goalRepo.save(goal);
+    public Long createGoal(Goal goal) {
+        return goalRepo.save(goal).getId();
     }
 
     public List<Goal> getAllGoals() {
@@ -44,8 +45,8 @@ public class GoalService {
     }
 
     public void deleteGoal(Long id, User user) {
-        Goal goal = goalRepo.findById(id).orElseThrow(EntityNotFoundException::new);
-        if (goal.getUser().getUsername().equals(user.getUsername())) {
+        Goal goal = goalRepo.findById(id).orElseThrow(EntityWasAlreadyDeleteException::new);
+        if (!goal.getUser().getUsername().equals(user.getUsername())) {
             throw new AuthFailedException();
         }
         goalRepo.deleteById(id);
@@ -104,16 +105,19 @@ public class GoalService {
         public void validate() {
 
             if (this.sum == null || this.sum < 0) {
-                throw new ValidationException("sum undefined");
+                throw new ValidationException("sum must be not negative");
             }
             if (this.deadline == null) {
-                throw new ValidationException("deadline undefined");
+                throw new ValidationException("deadline must be not empty");
+            }
+            if (this.deadline.isBefore(LocalDate.now())) {
+                throw new ValidationException("deadline must be in future");
             }
             if (this.name == null || this.name.isEmpty()) {
-                throw new ValidationException("name undefined");
+                throw new ValidationException("name must be not empty");
             }
             if (this.priority == null || (this.priority <= 0 || this.priority > 10)) {
-                throw new ValidationException("priority undefined");
+                throw new ValidationException("priority must be greater than 0 and less than 10");
             }
 
 
@@ -132,21 +136,20 @@ public class GoalService {
             private Long priority;
 
             public void validate() {
-                if (this.deadline != null
-                        || this.deadline.compareTo(LocalDate.now()) < 0) {
-                    throw new ValidationException("deadline undefined");
+                if (this.deadline != null && this.deadline.isBefore(LocalDate.now())) {
+                    throw new ValidationException("deadline must be in future");
                 }
                 if (this.sum != null && this.sum < 0) {
-                    throw new ValidationException("sum undefined");
+                    throw new ValidationException("sum must be not negative");
                 }
                 if (this.name != null && this.name.isEmpty()) {
-                    throw new ValidationException("name undefined");
+                    throw new ValidationException("name must be not empty");
                 }
                 if (this.description != null && this.description.isEmpty()) {
-                    throw new ValidationException("description undefined");
+                    throw new ValidationException("description must be not empty");
                 }
                 if (this.priority != null && (this.priority <= 0 || this.priority > 10)) {
-                    throw new ValidationException("priority undefined");
+                    throw new ValidationException("priority must be greater than 0 and less or equal than 10");
                 }
 
             }

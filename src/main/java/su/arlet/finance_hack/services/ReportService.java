@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import su.arlet.finance_hack.controllers.rest.ValidationException;
 import su.arlet.finance_hack.core.*;
 import su.arlet.finance_hack.core.enums.Period;
+import su.arlet.finance_hack.exceptions.AccessDeniedException;
 import su.arlet.finance_hack.exceptions.EntityWasAlreadyDeleteException;
 import su.arlet.finance_hack.repos.PaymentInfoRepo;
 import su.arlet.finance_hack.repos.ReportRepo;
@@ -34,8 +35,12 @@ public class ReportService {
     }
 
 
-    public void deleteReport(Long id) {
+    public void deleteReport(Long id, String username) {
         Report report = reportRepo.findById(id).orElseThrow(EntityWasAlreadyDeleteException::new);
+
+        if (!report.getUser().getUsername().equals(username)) {
+            throw new AccessDeniedException();
+        }
         reportRepo.deleteById(id);
     }
 
@@ -55,7 +60,7 @@ public class ReportService {
                 calendar.add(Calendar.YEAR, -1);
                 break;
             default:
-                throw new IllegalArgumentException("Unknown period type: " + periodType);
+                throw new ValidationException("Unknown period type: " + periodType+". Use DAILY, WEEKLY, MONTHLY, YEARLY");
         }
         return new Timestamp(calendar.getTimeInMillis());
     }
