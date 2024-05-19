@@ -3,11 +3,11 @@ package su.arlet.finance_hack.services;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import su.arlet.finance_hack.controllers.rest.ValidationException;
 import su.arlet.finance_hack.core.*;
 import su.arlet.finance_hack.core.enums.Period;
 import su.arlet.finance_hack.exceptions.AccessDeniedException;
-import su.arlet.finance_hack.exceptions.EntityWasAlreadyDeleteException;
+import su.arlet.finance_hack.exceptions.EntityWasAlreadyDeletedException;
+import su.arlet.finance_hack.exceptions.ValidationException;
 import su.arlet.finance_hack.repos.PaymentInfoRepo;
 import su.arlet.finance_hack.repos.ReportRepo;
 
@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 public class ReportService {
     private final ReportRepo reportRepo;
     private final PaymentInfoRepo paymentInfoRepo;
-    private final AuthService authService;
     private final UserService userService;
 
     public List<Report> getReports(String periodType) {
@@ -29,18 +28,19 @@ public class ReportService {
             Timestamp date = new Timestamp(System.currentTimeMillis());
             return reportRepo.findByCreated(date);
         }
+
         Timestamp startDate = getStartDateByPeriod(periodType);
         Timestamp endDate = new Timestamp(System.currentTimeMillis());
         return reportRepo.findAllByCreatedBetween(startDate, endDate);
     }
 
 
-    public void deleteReport(Long id, String username) {
-        Report report = reportRepo.findById(id).orElseThrow(EntityWasAlreadyDeleteException::new);
+    public void deleteReport(Long id, User user) {
+        Report report = reportRepo.findById(id).orElseThrow(EntityWasAlreadyDeletedException::new);
 
-        if (!report.getUser().getUsername().equals(username)) {
+        if (!report.getUser().getUsername().equals(user.getUsername()))
             throw new AccessDeniedException();
-        }
+
         reportRepo.deleteById(id);
     }
 
@@ -60,7 +60,7 @@ public class ReportService {
                 calendar.add(Calendar.YEAR, -1);
                 break;
             default:
-                throw new ValidationException("Unknown period type: " + periodType+". Use DAILY, WEEKLY, MONTHLY, YEARLY");
+                throw new ValidationException("Unknown period type: " + periodType + ". Use DAILY, WEEKLY, MONTHLY, YEARLY");
         }
         return new Timestamp(calendar.getTimeInMillis());
     }
@@ -141,36 +141,17 @@ public class ReportService {
         return categorySums;
     }
 
-    public Report getByIdBeforeDeleting(Long id) {
-        return reportRepo.findById(id).orElseThrow(EntityWasAlreadyDeleteException::new);
-    }
-
-    public static class ComparisonResult {
-        private Map<String, Long> categoryDifferences;
-        private long totalDifference;
-
-        public ComparisonResult(Map<String, Long> categoryDifferences, long totalDifference) {
-            this.categoryDifferences = categoryDifferences;
-            this.totalDifference = totalDifference;
-        }
-
-        public Map<String, Long> getCategoryDifferences() {
-            return categoryDifferences;
-        }
-
-        public long getTotalDifference() {
-            return totalDifference;
-        }
+    public record ComparisonResult(Map<String, Long> categoryDifferences, long totalDifference) {
     }
 
 
     @Getter
     public static class DateAndPeriod {
-        private int firstMonth;
-        private int firstYear;
-        private int secondMonth;
-        private int secondYear;
-        private Period period;
+        private final int firstMonth;
+        private final int firstYear;
+        private final int secondMonth;
+        private final int secondYear;
+        private final Period period;
 
         public DateAndPeriod(int firstMonth, int firstYear, int secondMonth, int secondYear, String periodType) {
             this.firstMonth = firstMonth;

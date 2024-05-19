@@ -82,8 +82,8 @@ public class UserController {
     @ApiResponse(responseCode = "404", description = "Not found - User not found")
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     public ResponseEntity<?> getUserByUsername(HttpServletRequest httpServletRequest) {
-        var username = authService.getUsernameFromHttpRequest(httpServletRequest);
-        return new ResponseEntity<>(userService.getByUsername(username), HttpStatus.OK);
+        User user = authService.getUserFromHttpRequest(httpServletRequest);
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     @GetMapping("/")
@@ -110,9 +110,9 @@ public class UserController {
     public ResponseEntity<?> updateUser(
             @RequestBody UserService.UpdateUserEntity updateUserEntity, HttpServletRequest httpServletRequest
     ) {
-        var username = authService.getUsernameFromHttpRequest(httpServletRequest);
+        User user = authService.getUserFromHttpRequest(httpServletRequest);
         updateUserEntity.validate();
-        userService.updateUserByUsername(updateUserEntity, username);
+        userService.updateUserByUsername(updateUserEntity, user.getUsername());
 
         return ResponseEntity.ok(null);
     }
@@ -123,8 +123,9 @@ public class UserController {
     @ApiResponse(responseCode = "204", description = "No content", content = {@Content()})
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     public ResponseEntity<?> deleteUser(HttpServletRequest httpServletRequest) {
-        var username = authService.getUsernameFromHttpRequest(httpServletRequest);
-        userService.delete(username);
+        User user = authService.getUserFromHttpRequest(httpServletRequest);
+
+        userService.delete(user.getUsername());
         return ResponseEntity.ok(null);
     }
 
@@ -137,8 +138,9 @@ public class UserController {
     @ApiResponse(responseCode = "404", description = "Not found - User not found")
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     public ResponseEntity<?> getLimitByUsername(HttpServletRequest httpServletRequest) {
-        var username = authService.getUsernameFromHttpRequest(httpServletRequest);
-        return new ResponseEntity<>(userService.getByUsername(username).getLimit(), HttpStatus.OK);
+        User user = authService.getUserFromHttpRequest(httpServletRequest);
+
+        return new ResponseEntity<>(user.getLimit(), HttpStatus.OK);
     }
 
     @GetMapping("/wastings")
@@ -150,7 +152,8 @@ public class UserController {
     @ApiResponse(responseCode = "404", description = "Not found - User not found")
     @ApiResponse(responseCode = "500", description = "Server error", content = {@Content()})
     public ResponseEntity<?> getCurrentWastingsByUsername(HttpServletRequest httpServletRequest) {
-        var username = authService.getUsernameFromHttpRequest(httpServletRequest);
-        return new ResponseEntity<>(userService.getByUsername(username).getCurrentWastings(), HttpStatus.OK);
+        User user = authService.getUserFromHttpRequest(httpServletRequest);
+
+        return new ResponseEntity<>(user.getCurrentWastings(), HttpStatus.OK);
     }
 }

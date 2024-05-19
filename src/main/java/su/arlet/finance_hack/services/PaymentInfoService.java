@@ -4,10 +4,11 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import su.arlet.finance_hack.controllers.rest.ValidationException;
 import su.arlet.finance_hack.core.*;
 import su.arlet.finance_hack.core.enums.PaymentType;
-import su.arlet.finance_hack.exceptions.EntityWasAlreadyDeleteException;
+import su.arlet.finance_hack.exceptions.EntityNotFoundException;
+import su.arlet.finance_hack.exceptions.EntityWasAlreadyDeletedException;
+import su.arlet.finance_hack.exceptions.ValidationException;
 import su.arlet.finance_hack.repos.ItemCategoryRepo;
 import su.arlet.finance_hack.repos.PaymentInfoRepo;
 import su.arlet.finance_hack.repos.UserRepo;
@@ -23,7 +24,6 @@ public class PaymentInfoService {
     private final ItemCategoryRepo itemCategoryRepo;
     private final GoalService goalService;
     private final NotificationSender sender;
-    private final UserService userService;
     private final UserRepo userRepo;
 
     private final Counter wasteCounter;
@@ -34,9 +34,14 @@ public class PaymentInfoService {
         this.itemCategoryRepo = itemCategoryRepo;
         this.goalService = goalService;
         this.sender = sender;
-        this.userService = userService1;
         this.userRepo = userRepo;
         wasteCounter = meterRegistry.counter("waste_counter");
+    }
+
+    public ItemCategory getItemCategory(String name) {
+        return itemCategoryRepo.findItemCategoryByName(name).orElseThrow(
+                () -> new EntityNotFoundException("item category")
+        );
     }
 
     public Long addWaste(PaymentInfo info) {
@@ -69,29 +74,19 @@ public class PaymentInfoService {
         return save.getId();
     }
 
-    public List<PaymentInfo> getByFilter(PaymentInfoFilter paymentInfoFilter, User user) {
-
-        // TODO при создании нового переводы и незаданные категории будут помечены unknown
-
-        List<PaymentInfo> paymentInfos = paymentInfoRepo.findAllByUser(user);
-
-        return paymentInfos.stream()
-                .filter(info -> (paymentInfoFilter.isTransfer() && info.getIsTransfer() && paymentInfoFilter.getPaymentType() == info.getPaymentType())
-                        || (!paymentInfoFilter.isTransfer() && (paymentInfoFilter.getItemCategory() == null || paymentInfoFilter.getItemCategory() == info.getItemCategory())))
-                .toList();
-
+    public List<PaymentInfo> getPayments(User user) {
+        return paymentInfoRepo.findAllByUser(user);
     }
 
 
     public void deleteWaste(Long paymentId) {
-        PaymentInfo info = paymentInfoRepo.findById(paymentId).orElseThrow(EntityWasAlreadyDeleteException::new);
+        PaymentInfo info = paymentInfoRepo.findById(paymentId).orElseThrow(EntityWasAlreadyDeletedException::new);
 
         if (info.getPaymentType() == PaymentType.SAVED) {
             User user = changeUserCurrentWasting(info.getUser(), -info.getSum());
             userRepo.save(user);
         }
 
-        // TODO: что делать в случае отката банком операции с типом FOR_GOAL? Пока просто не будем поддерживать операцию удаления
         if (info.getPaymentType() == PaymentType.FOR_GOAL) {
             throw new ValidationException("you cannot delete paymentInfo that has been sent to the goal");
         }
@@ -100,7 +95,7 @@ public class PaymentInfoService {
     }
 
     public PaymentInfo getByIdBeforeDeleting(Long id) {
-        return paymentInfoRepo.findById(id).orElseThrow(EntityWasAlreadyDeleteException::new);
+        return paymentInfoRepo.findById(id).orElseThrow(EntityWasAlreadyDeletedException::new);
     }
 
     public List<PaymentInfo> updateWastes(List<PaymentInfo> paymentInfoList) {
@@ -110,7 +105,8 @@ public class PaymentInfoService {
 
         for (var paymentInfo : paymentInfoList) {
             if (paymentInfo.getPaymentType() == PaymentType.SAVED) {
-                // TODO : добавить работу с лимитами трат
+                User user = changeUserCurrentWasting(paymentInfo.getUser(), paymentInfo.getSum());
+                userRepo.save(user);
             }
 
             if (paymentInfo.getPaymentType() == PaymentType.FOR_GOAL)
